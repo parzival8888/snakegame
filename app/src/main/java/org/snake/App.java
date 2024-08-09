@@ -5,7 +5,7 @@ package org.snake;
 
 public class App {
     public String getGreeting() {
-        return "Hello Old World!";
+        return "Hello new World!";
     }
 
     public static void main(String[] args) {
