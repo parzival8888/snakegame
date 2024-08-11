@@ -4,11 +4,14 @@
 package org.snake;
 
 public class App {
-    public String getGreeting() {
-        return "Hello Old World!";
-    }
-
     public static void main(String[] args) {
-        System.out.println(new App().getGreeting());
+
+        // Create instances of the model, view, and controller
+        SnakegameModel model = new SnakegameModel();
+        SnakegameView view = new SnakegameView(model);
+        // SnakegameController controller = new SnakegameController(model, view);
+
+        // Display the view
+        view.setVisible(true);
     }
 }

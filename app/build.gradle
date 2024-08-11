@@ -39,6 +39,14 @@ java {
     }
 }
 
+sourceSets {
+    main {
+        java {
+            srcDir 'src/main/java'
+        }
+    }
+}
+
 application {
     // Define the main class for the application.
     mainClass = 'org.snake.App'

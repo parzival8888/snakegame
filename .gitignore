@@ -1,6 +1,9 @@
 # Compiled class file
 *.class
 
+# Build files
+app/build
+
 # Log file
 *.log
 
@@ -21,9 +24,17 @@
 
 # Dev tool files
 .DS_Store
-.vscode
 .gradle
 
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
 replay_pid*
+app/build/distributions/app.tar
+app/build/reports/tests/test/index.html
+app/build/reports/tests/test/classes/org.example.AppTest.html
+app/build/reports/tests/test/packages/org.example.html
+app/build/test-results/test/TEST-org.example.AppTest.xml
+app/build/test-results/test/binary/results.bin
+app/build/tmp/compileJava/previous-compilation-data.bin
+app/build/tmp/compileJava/compileTransaction/stash-dir/App.class.uniqueId0
+app/build/tmp/compileTestJava/previous-compilation-data.bin
