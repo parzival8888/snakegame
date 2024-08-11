@@ -1,5 +1,6 @@
 package org.snake.util;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
@@ -10,8 +11,7 @@ public class ConfigReader {
     public static void readConfig(String configFilename) {
         try (InputStream is = ConfigReader.class.getClassLoader().getResourceAsStream(configFilename)) {
             if (is == null) {
-                System.out.println("The config file does not exist: " + configFilename);
-                return;
+                throw new FileNotFoundException("The properties file " + configFilename + " does not exist.");
             }
 
             // load the properties file

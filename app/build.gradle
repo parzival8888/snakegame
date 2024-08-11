@@ -32,6 +32,15 @@ testing {
     }
 }
 
+
+test {
+	testLogging {
+		events "PASSED", "SKIPPED", "FAILED", "STANDARD_OUT", "STANDARD_ERROR"
+        exceptionFormat "full"
+	}
+}
+
+
 // Apply a specific Java toolchain to ease working on different environments.
 java {
     toolchain {

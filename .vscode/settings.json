@@ -1,5 +1,5 @@
 {
-    "java.configuration.updateBuildConfiguration": "interactive",
+    "java.configuration.updateBuildConfiguration": "automatic",
     "gradle.nestedProjects": false,
     "java.project.outputPath": "bin",
     "java.project.sourcePaths": ["src/main/java"],
