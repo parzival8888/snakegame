@@ -3,13 +3,15 @@ package org.snake;
 import javax.swing.*;
 
 import java.awt.*;
+import java.awt.event.ActionListener;
 import java.util.ArrayList;
 
 public class SnakegameView extends JFrame {
     private SnakegameModel model;
     private JLabel scoreLabel;
     private JLabel timerLabel;
-    private int cellSize;
+    private JButton buttonNewGame;
+    private GameboardPanel gameboardPanel;
 
     // The main panel manages the other panels and switches between the game panel,
     // start panel, etc.
@@ -21,7 +23,7 @@ public class SnakegameView extends JFrame {
     // game board, and the score panel containing the score and the timer
     private JPanel gamePanel;
     // The game board panel
-    private JPanel boardPanel;
+    //private JPanel boardPanel;
     // The panel containing the score and timer, displayed during gameplay
     private JPanel scorePanel;
     // The panel containing the leaderboard
@@ -43,16 +45,15 @@ public class SnakegameView extends JFrame {
         setSize(model.getBoardSize(), model.getBoardSize());
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
-        cellSize = model.getCellSize();
         createStartPanel();
         createGamePanel();
         createMainPanel();
-        createLeaderboardPanel();
+        // createLeaderboardPanel();
         add(mainPanel);
         this.setVisible(true);
     }
 
-    private void createMainPanel() {
+    public void createMainPanel() {
         // Create the main panel for the game. This panel will contain panels for game,
         // leaderboard and game history
         cardLayout = new CardLayout();
@@ -62,23 +63,20 @@ public class SnakegameView extends JFrame {
         cardLayout.show(mainPanel, start);
     }
 
-    private void createGamePanel() {
+    public void createGamePanel() {
 
+        // Create the panel with the game score and timer
         createScorePanel();
 
         // Create the panel for the game board
-        boardPanel = new JPanel() {
-            @Override
-            protected void paintComponent(Graphics graphic) {
-                super.paintComponent(graphic);
-                prepareBoard(graphic);
-                startGame(graphic);
-            }
-        };
-        // Add the game board panel and the game score / timer panel to the main game panel
+        gameboardPanel = new GameboardPanel(model);
+        model.setNewGame(true);
+
+        // Add the game board panel and the game score / timer panel to the main game
+        // panel
         gamePanel = new JPanel(new BorderLayout());
         gamePanel.add(scorePanel, BorderLayout.NORTH);
-        gamePanel.add(boardPanel, BorderLayout.CENTER);
+        gamePanel.add(gameboardPanel, BorderLayout.CENTER);
     }
 
     private void createScorePanel() {
@@ -89,18 +87,18 @@ public class SnakegameView extends JFrame {
         scoreLabel.setHorizontalAlignment(SwingConstants.LEFT);
         timerLabel = new JLabel("Timer:");
         timerLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        JButton buttonNewGame = new JButton(newGame);
+        buttonNewGame = new JButton(newGame);
         buttonNewGame.setAlignmentX(SwingConstants.RIGHT);
-
-        // Add listeners to handle button clicks
-        buttonNewGame.addActionListener(e -> model.newGame());
 
         scorePanel.add(scoreLabel);
         scorePanel.add(timerLabel);
         scorePanel.add(buttonNewGame);
+
+        // Add listeners to handle button clicks
+        buttonNewGame.addActionListener(e -> model.setNewGame(true));
     }
 
-    private void createStartPanel() {
+    public void createStartPanel() {
         // Create the panel for the game start, with appropriate menu options
         startPanel = new JPanel();
         startPanel.setLayout(new BoxLayout(startPanel, BoxLayout.Y_AXIS));
@@ -138,6 +136,8 @@ public class SnakegameView extends JFrame {
     private void switchPanel(String text) {
         if (text == newGame) {
             cardLayout.show(mainPanel, newGame);
+            createGamePanel();
+            mainPanel.add(gamePanel, newGame);
         } else if (text == gameLeaderboard)
             cardLayout.show(mainPanel, gameLeaderboard);
         else if (text == gameHistory)
@@ -146,39 +146,9 @@ public class SnakegameView extends JFrame {
             cardLayout.show(mainPanel, start);
     }
 
-    private void prepareBoard(Graphics graphic) {
-        // Draw the game board 
-        graphic.setColor(model.getBoardColour());
-        graphic.fillRect(0, 0, model.getBoardSize(), model.getBoardSize());
-
-        // Draw a grid pattern to allow the player to see each of the cells on the board
-        // Draw vertical lines
-        graphic.setColor(model.getBoardGridColour());
-        for (int i = 0; i <= model.getNumberOfColumns(); i++) {
-            int x = i * cellSize;
-            graphic.drawLine(x, 0, x, model.getBoardSize());
-        }
-
-        // Draw horizontal lines
-        for (int i = 0; i <= model.getNumberOfColumns(); i++) {
-            int y = i * cellSize;
-            graphic.drawLine(0, y, model.getBoardSize(), y);
-        }
-    }
-
-    private void startGame(Graphics graphic) {
-        model.newGame();
-
-        // Place the snake head randomly on the game board
-        ArrayList<Cell> snake = model.getSnake();
-        Cell snakeHead = snake.get(0);
-        graphic.setColor(Color.GREEN);
-        graphic.fillRect(snakeHead.getX() * cellSize, snakeHead.getY() * cellSize, cellSize, cellSize);
-
-        // Place a food item randomly on the game board
-        Cell food = model.getFoodLocation();
-        graphic.setColor(Color.ORANGE);
-        graphic.fillRect(food.getX() * cellSize, food.getY() * cellSize, cellSize, cellSize);
+    public void addButtonListener(ActionListener listenForButton) {
+        if (!(buttonNewGame == null))
+            buttonNewGame.addActionListener(listenForButton);
     }
 
     public void setScore(int score) {

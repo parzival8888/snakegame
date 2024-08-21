@@ -9,7 +9,6 @@ public class App {
         // Create instances of the model, view, and controller
         SnakegameModel model = new SnakegameModel();
         SnakegameView view = new SnakegameView(model);
-        // SnakegameController controller = new SnakegameController(model, view);
 
         // Display the view
         view.setVisible(true);
