@@ -1,10 +1,13 @@
 package org.snake;
 
-import javax.swing.*;
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Graphics;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
+
+import javax.swing.JPanel;
+import javax.swing.Timer;
 
 public class GameboardPanel extends JPanel {
     private SnakegameModel model;
@@ -13,11 +16,13 @@ public class GameboardPanel extends JPanel {
     private Cell snakeHead;
     private Cell food;
     private int cellSize;
+    private int timerInterval;
 
     public GameboardPanel(SnakegameModel model) {
         this.model = model;
+        this.timerInterval = model.getTimerInterval();
         // Create a timer that moves the snake. The timer delay is configurable
-        timer = new Timer(1000, new ActionListener() {
+        timer = new Timer(timerInterval, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 moveSnake();
@@ -40,8 +45,11 @@ public class GameboardPanel extends JPanel {
         // Draw the snake head
         graphic.setColor(Color.GREEN);
         graphic.fillRect(snakeHead.getX() * cellSize, snakeHead.getY() * cellSize, cellSize, cellSize);
-        
+    
         // Draw the food
+        graphic.setColor(Color.RED);
+        graphic.fillRect(food.getX() * cellSize, food.getY() * cellSize, cellSize, cellSize);
+
 
     }
 
@@ -73,6 +81,8 @@ public class GameboardPanel extends JPanel {
         System.out.println("Snake head positioned at x: " + snakeHead.getX());
 
         // Place a food item randomly on the game board
+        food = model.placeFood();
+        System.out.println("Food positioned at x: " + food.getX());
     }
 
     private void moveSnake() {

@@ -16,6 +16,7 @@ public class SnakegameModel {
     private Color boardGridColour;
     private boolean gameOver;
     private boolean newGame;
+    private int timerInterval;
 
     // The snake, with the head in the first position
     private ArrayList<Cell> snake;
@@ -35,8 +36,10 @@ public class SnakegameModel {
         this.cellSize = this.boardSize / this.numberofcolumns;
         this.boardColour = Color.decode(ConfigReader.getProperty("boardcolour"));
         this.boardGridColour = Color.decode(ConfigReader.getProperty("boardgridcolour"));
+        this.timerInterval =  Integer.parseInt(ConfigReader.getProperty("timerinterval"));
         System.out.println("game title is: " + this.gameTitle);
         System.out.println("board size is: " + this.boardSize);
+        System.out.println("time interval is" + this.timerInterval);
     }
 
     public String getGameTitle() {
@@ -49,6 +52,9 @@ public class SnakegameModel {
 
     public int getNumberOfColumns() {
         return numberofcolumns;
+    }
+    public int getTimerInterval() {
+        return timerInterval;
     }
 
     public int getCellSize() {
@@ -81,8 +87,12 @@ public class SnakegameModel {
     }
 
     public Cell placeFood() {
+        int x = randomNumberGenerator.nextInt(boardSize/cellSize);
+        int y = randomNumberGenerator.nextInt(boardSize/cellSize);
+        Cell food = new Cell(x, y);
         return food;
 	}
+
 
     public void startNewGame() {
         this.initialiseSnake();
