@@ -18,20 +18,20 @@ public class GameboardPanel extends JPanel {
     private Cell food;
     private int cellSize;
     private int timerInterval;
+    private char direction;
 
     public GameboardPanel(SnakegameModel model) {
         this.model = model;
         this.timerInterval = model.getTimerInterval();
-        this.addKeyListener(new MyKeyAdapter());
-        // Key listener to handle direction changes
-
+        this.addKeyListener(new MyKeyAdapter()); // Key listener to handle direction changes via arrow keys
+        
         // Create a timer that moves the snake. The timer delay is configurable
         timer = new Timer(timerInterval, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 moveSnake();
                 repaint(); // Request a repaint
-                if(model.isGameOver()){
+                if(model.isGameOver()) {
                     timer.stop();
                 }
             }
@@ -64,6 +64,8 @@ public class GameboardPanel extends JPanel {
         // Draw the food
         graphic.setColor(Color.RED);
         graphic.fillRect(food.getX() * cellSize, food.getY() * cellSize, cellSize, cellSize);
+
+        // Display game over 
         if (model.isGameOver()){
             graphic.drawString("Game Over", 5, 10);
         }
@@ -142,7 +144,7 @@ public class GameboardPanel extends JPanel {
         }
     }
         
-           // Handle pressing the arrow keys
+    // Handle pressing the arrow keys
     // First, get the snake direction from the model
     // Then use a 'switch' statement on the key pressed using e.getKeyCode()
     // If the left key was pressed, KeyEvent.VK_LEFT, then set the snake direction
@@ -155,29 +157,26 @@ public class GameboardPanel extends JPanel {
         public void keyPressed(KeyEvent e) {
             switch (e.getKeyCode()) {
                 case KeyEvent.VK_LEFT:
-                    if (!model.getDirection().equals("R")) {
-                        model.setDirection("L");
+                    if (model.getDirection() !=  'R') {
+                        model.setDirection('L');
                     }
                     break;
                 case KeyEvent.VK_RIGHT:
-                    if (!model.getDirection().equals("L")) {
-                        model.setDirection("R");
+                    if (model.getDirection() != 'L') {
+                        model.setDirection('R');
                     }
                     break;
                 case KeyEvent.VK_UP:
-                    if (!model.getDirection().equals("D")) {
-                        model.setDirection("U");
+                    if (model.getDirection() !='D') {
+                        model.setDirection('U');
                     }
                     break;
                 case KeyEvent.VK_DOWN:
-                    if (!model.getDirection().equals("U")) {
-                        model.setDirection("D");
+                    if (model.getDirection() != 'U') {
+                        model.setDirection('D');
                     }
                     break;
             }
         }
-    };
-    
-    
-    
+    }
 }

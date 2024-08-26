@@ -17,7 +17,7 @@ public class SnakegameModel {
     private boolean gameOver;
     private boolean newGame;
     private int timerInterval;
-    private String direction;
+    private char direction;
     private int snakeLength;
     private int wallTop;
     private int wallBottom;
@@ -44,7 +44,7 @@ public class SnakegameModel {
         this.boardColour = Color.decode(ConfigReader.getProperty("boardcolour"));
         this.boardGridColour = Color.decode(ConfigReader.getProperty("boardgridcolour"));
         this.timerInterval = Integer.parseInt(ConfigReader.getProperty("timerinterval"));
-        this.direction = ConfigReader.getProperty("startdirection");
+        this.direction = ConfigReader.getProperty("startdirection").charAt(0);
         this.wallTop = 0;
         this.wallLeft = 0;
         this.wallBottom = this.numberOfColumns - 1;
@@ -109,11 +109,11 @@ public class SnakegameModel {
         return snake;
     }
 
-    public String getDirection() {
+    public char getDirection() {
         return direction;
     }
 
-    public void setDirection(String direction) {
+    public void setDirection(char direction) {
         this.direction = direction;
     }
 
