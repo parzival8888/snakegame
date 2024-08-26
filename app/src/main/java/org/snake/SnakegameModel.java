@@ -131,8 +131,7 @@ public class SnakegameModel {
 
     /**
      * Check whether two Cells have collided. This could be the
-     * snake head colliding with food, or the snake head colliding
-     * with its own body, or with a wall.
+     * snake head colliding with food.
      * 
      * A collision occurs when the 'x' and 'y' coordinates of both Cells
      * are identical.
@@ -143,6 +142,8 @@ public class SnakegameModel {
      */
     public boolean isCollision(Cell cell1, Cell cell2) {
         if (cell1.getX() == cell2.getX() && cell1.getY() == cell2.getY()) {
+            // Grow the snake if there is a collision with a food item
+
             return true;
         } else {
             return false;

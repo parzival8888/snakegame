@@ -95,9 +95,8 @@ public class GameboardPanel extends JPanel {
     }
 
     private void startGame() {
-        // Initialize the snake and its starting position
-        snake = new ArrayList<>();
-        snake.add(new Cell(5, 5)); // Example starting position
+        // Place the snake head randomly on the game board
+        snake = model.getSnake();
         snakeHead = snake.get(0);
         System.out.println("Snake head positioned at x: " + snakeHead.getX());
 
