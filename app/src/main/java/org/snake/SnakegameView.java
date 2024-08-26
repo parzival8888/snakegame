@@ -42,7 +42,6 @@ public class SnakegameView extends JFrame {
         this.model = model;
         System.out.println("Board size will be set to: " + model.getBoardSize());
         setTitle(model.getGameTitle());
-        setSize(model.getBoardSize(), model.getBoardSize());
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         createStartPanel();
@@ -50,6 +49,10 @@ public class SnakegameView extends JFrame {
         createMainPanel();
         // createLeaderboardPanel();
         add(mainPanel);
+        // The size of the frame will be the size of the game board plus
+        // a little extra (10%) to cater for the score and timer bar
+        int height = model.getBoardSize() + (model.getBoardSize() * 10 / 100);
+        setSize(model.getBoardSize(), height);
         this.setVisible(true);
     }
 

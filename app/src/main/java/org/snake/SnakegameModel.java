@@ -19,6 +19,10 @@ public class SnakegameModel {
     private int timerInterval;
     private char direction;
     private int snakeLength;
+    private int wallTop;
+    private int wallBottom;
+    private int wallLeft;
+    private int wallRight;
 
     // The snake, with the head in the first position
     private ArrayList<Cell> snake;
@@ -44,6 +48,20 @@ public class SnakegameModel {
         System.out.println("game title is: " + this.gameTitle);
         System.out.println("board size is: " + this.boardSize);
         System.out.println("time interval is" + this.timerInterval);
+
+        // Board Size needs to be perfectly divisible by the number of columns
+        // Otherwise the board will show an additional part of a column
+        // Since the column size is calculated based on board size, this is 
+        // just a slight adjustment, similar to rounding down to the nearest int
+        this.boardSize = this.numberOfColumns * this.cellSize;
+
+        // Set the x and y coordinates of the game wall
+        // Though the board is currently square, we'll set x and y coords in
+        // case it changes in future to a rectangular share
+        wallTop = 0;
+        wallBottom = this.numberOfColumns - 1;
+        wallLeft = 0;
+        wallRight = this.numberOfColumns - 1;
     }
 
     public String getGameTitle() {
@@ -94,6 +112,18 @@ public class SnakegameModel {
         this.direction = direction;
     }
 
+    public boolean isGameOver() {
+        return gameOver;
+    }
+
+    public void setNewGame(boolean newGame) {
+        this.newGame = newGame;
+    }
+
+    public boolean getNewGame() {
+        return newGame;
+    }
+
     /**
      * Check whether two Cells have collided. This could be the
      * snake head colliding with food, or the snake head colliding
@@ -106,8 +136,32 @@ public class SnakegameModel {
      * @param cell2 - the second Cell
      * @return a boolean indicating whether the two Cells refer to the same location
      */
+     public boolean collision(Cell cell1, Cell cell2) {
+        if (cell1.getX() == cell2.getX() && cell1.getY() == cell2.getY())
+            return true;
+        else
+            return false;
+    }
 
-
+        /**
+     * Check whether the snake head has collided with a wall. If so, game over
+     * 
+     * A collision occurs when either the 'x' or 'y' coordinate of the snake
+     * head matches the coordinate of a wall. If so, the gameOver boolean will be set
+     * to true
+     * 
+     * @param snakeHead - the snake head
+     * @return a boolean indicating whether the snake head has collided with a wall
+     */
+    public boolean collisionWithWall(Cell snakeHead) {
+        if (snakeHead.getX() == wallTop || snakeHead.getX() == wallBottom ||
+            snakeHead.getY() == wallLeft || snakeHead.getY() == wallRight) {
+                gameOver = true;
+                return true;    
+            }
+        else
+            return false;
+    }
 
     /**
      * Initialise the snake with the snake head at position 0 in the ArrayList
@@ -139,17 +193,4 @@ public class SnakegameModel {
         this.initialiseSnake();
         this.placeFood();
     }
-
-    public boolean isGameOver() {
-        return gameOver;
-    }
-
-    public void setNewGame(boolean newGame) {
-        this.newGame = newGame;
-    }
-
-    public boolean getNewGame() {
-        return newGame;
-    }
-
 }

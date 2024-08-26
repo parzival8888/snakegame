@@ -24,12 +24,15 @@ public class GameboardPanel extends JPanel {
     public GameboardPanel(SnakegameModel model) {
         this.model = model;
         this.timerInterval = model.getTimerInterval();
+        this.addKeyListener(new MyKeyAdapter());
         // Create a timer that moves the snake. The timer delay is configurable
         timer = new Timer(timerInterval, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 moveSnake();
                 repaint(); // Request a repaint
+                if (model.isGameOver())
+                    timer.stop();
             }
         });
         timer.start(); // Start the timer
@@ -61,27 +64,35 @@ public class GameboardPanel extends JPanel {
         // Draw the food
         graphic.setColor(Color.RED);
         graphic.fillRect(food.getX() * cellSize, food.getY() * cellSize, cellSize, cellSize);
+
+        // Check for game over
+        if (model.isGameOver()) {
+            graphic.drawString("Game Over", 10, 10);
+        }
     }
 
     private void prepareBoard(Graphics graphic) {
+        int boardSize = model.getBoardSize();
+        int numColumns = model.getNumberOfColumns();
+        cellSize = model.getCellSize();
+
         // Draw the game board
         graphic.setColor(model.getBoardColour());
-        graphic.fillRect(0, 0, model.getBoardSize(), model.getBoardSize());
+        graphic.fillRect(0, 0, boardSize, boardSize);
 
         // Draw a grid pattern to allow the player to see each of the cells on the board
         // Draw vertical lines
         graphic.setColor(model.getBoardGridColour());
-        for (int i = 0; i <= model.getNumberOfColumns(); i++) {
+        for (int i = 0; i <= numColumns; i++) {
             int x = i * cellSize;
-            graphic.drawLine(x, 0, x, model.getBoardSize());
+            graphic.drawLine(x, 0, x, boardSize);
         }
 
         // Draw horizontal lines
-        for (int i = 0; i <= model.getNumberOfColumns(); i++) {
+        for (int i = 0; i <= numColumns; i++) {
             int y = i * cellSize;
-            graphic.drawLine(0, y, model.getBoardSize(), y);
+            graphic.drawLine(0, y, boardSize, y);
         }
-        cellSize = model.getCellSize();
     }
 
     private void startGame() {
@@ -106,6 +117,22 @@ public class GameboardPanel extends JPanel {
         if (!(snakeHead == null)) {
             // Move the snake head...see the comments above
 
+            direction = model.getDirection();
+            switch (direction) {
+                case 'U':
+                    snakeHead.setY(snakeHead.getY() - 1);
+                    break;
+                case 'D':
+                    snakeHead.setY(snakeHead.getY() + 1);
+                    break;
+                case 'L':
+                    snakeHead.setX(snakeHead.getX() - 1);
+                    break;
+                case 'R':
+                    snakeHead.setX(snakeHead.getX() + 1);
+                    break;
+            }
+
             // Move the snake body
             for (int i = snake.size(); i > 1; i--) {
                 Cell bodySegment = snake.get(i - 1);
@@ -117,6 +144,14 @@ public class GameboardPanel extends JPanel {
             // Check for collision between snake head and food
             // Call the appropriate method on the model to check for a collision
             // If there is a collision, use the model to place a new food item
+            if (model.collision(snakeHead, food)) {
+                food = model.placeFood();
+            }
+
+            // Check for collision between snake head and a wall
+            // If there is a collision, this will set the 'gameOver' flag
+            // on the model and the current game will end
+            model.collisionWithWall(snakeHead);
         }
     }
 
@@ -128,5 +163,35 @@ public class GameboardPanel extends JPanel {
     // But only if it wasn't previously 'R', otherwise the snake will double back on
     // itself, which isn't allowed
     // The same for the other arrow keys
-
+    private class MyKeyAdapter extends KeyAdapter {
+        @Override
+        public void keyPressed(KeyEvent e) {
+            switch (e.getKeyCode()) {
+                case KeyEvent.VK_LEFT:
+                    if (model.getDirection() != 'R') { // Prevent the snake from reversing
+                        System.out.println("Left arrow");
+                        model.setDirection('L');
+                    }
+                    break;
+                case KeyEvent.VK_RIGHT:
+                    if (model.getDirection() != 'L') {
+                        System.out.println("Right arrow");
+                        model.setDirection('R');
+                    }
+                    break;
+                case KeyEvent.VK_UP:
+                    if (model.getDirection() != 'D') {
+                        System.out.println("Up arrow");
+                        model.setDirection('U');
+                    }
+                    break;
+                case KeyEvent.VK_DOWN:
+                    if (model.getDirection() != 'U') {
+                        System.out.println("Down arrow");
+                        model.setDirection('D');
+                    }
+                    break;
+            }
+        }
+    }
 }
