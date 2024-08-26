@@ -17,7 +17,7 @@ public class SnakegameModel {
     private boolean gameOver;
     private boolean newGame;
     private int timerInterval;
-    private char direction;
+    private String direction;
     private int snakeLength;
     private int wallTop;
     private int wallBottom;
@@ -44,7 +44,12 @@ public class SnakegameModel {
         this.boardColour = Color.decode(ConfigReader.getProperty("boardcolour"));
         this.boardGridColour = Color.decode(ConfigReader.getProperty("boardgridcolour"));
         this.timerInterval = Integer.parseInt(ConfigReader.getProperty("timerinterval"));
-        this.direction = ConfigReader.getProperty("startdirection").charAt(0);
+        this.direction = ConfigReader.getProperty("startdirection");
+        this.wallTop = 0;
+        this.wallLeft = 0;
+        this.wallBottom = this.numberOfColumns - 1;
+        this.wallRight = this.numberOfColumns - 1;
+
         System.out.println("game title is: " + this.gameTitle);
         System.out.println("board size is: " + this.boardSize);
         System.out.println("time interval is" + this.timerInterval);
@@ -104,11 +109,11 @@ public class SnakegameModel {
         return snake;
     }
 
-    public char getDirection() {
+    public String getDirection() {
         return direction;
     }
 
-    public void setDirection(char direction) {
+    public void setDirection(String direction) {
         this.direction = direction;
     }
 
@@ -136,38 +141,32 @@ public class SnakegameModel {
      * @param cell2 - the second Cell
      * @return a boolean indicating whether the two Cells refer to the same location
      */
-     public boolean collision(Cell cell1, Cell cell2) {
-        if (cell1.getX() == cell2.getX() && cell1.getY() == cell2.getY())
+    public boolean isCollision(Cell cell1, Cell cell2) {
+        if (cell1.getX() == cell2.getX() && cell1.getY() == cell2.getY()) {
             return true;
-        else
+        } else {
             return false;
+        }
     }
 
-        /**
-     * Check whether the snake head has collided with a wall. If so, game over
-     * 
-     * A collision occurs when either the 'x' or 'y' coordinate of the snake
-     * head matches the coordinate of a wall. If so, the gameOver boolean will be set
-     * to true
-     * 
-     * @param snakeHead - the snake head
-     * @return a boolean indicating whether the snake head has collided with a wall
-     */
-    public boolean collisionWithWall(Cell snakeHead) {
-        if (snakeHead.getX() == wallTop || snakeHead.getX() == wallBottom ||
-            snakeHead.getY() == wallLeft || snakeHead.getY() == wallRight) {
-                gameOver = true;
-                return true;    
-            }
-        else
+    public boolean isCollisionWall(Cell snakehead) {
+        if (snakehead.getX() == wallTop || snakehead.getX() == wallBottom || snakehead.getY() == wallLeft
+                || snakehead.getY() == wallRight) {
+            gameOver = true;
+            return true;
+        } 
+        else {
             return false;
+        }
+
     }
 
     /**
      * Initialise the snake with the snake head at position 0 in the ArrayList
      * 
-     * @return an ArrayList of Cells representing the snake body with the snake head in position 0
-     */ 
+     * @return an ArrayList of Cells representing the snake body with the snake head
+     *         in position 0
+     */
     public ArrayList<Cell> initialiseSnake() {
         int x = randomNumberGenerator.nextInt(boardSize / cellSize);
         int y = randomNumberGenerator.nextInt(boardSize / cellSize);
@@ -176,7 +175,7 @@ public class SnakegameModel {
         snake.add(snakeHead);
         for (int i = 0; i < snakeLength; i++) {
             Cell bodySegment = new Cell(x, y + i);
-            snake.add(bodySegment); 
+            snake.add(bodySegment);
         }
         System.out.println("Snake length in initialiseSnake is: " + snake.size());
         return snake;

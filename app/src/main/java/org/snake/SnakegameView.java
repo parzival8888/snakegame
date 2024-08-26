@@ -161,4 +161,5 @@ public class SnakegameView extends JFrame {
     public void setTimer(int timer) {
         timerLabel.setText("Timer: " + timer);
     }
+    
 }
