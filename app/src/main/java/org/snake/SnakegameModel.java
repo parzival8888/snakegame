@@ -23,6 +23,7 @@ public class SnakegameModel {
     private int wallBottom;
     private int wallLeft;
     private int wallRight;
+    private int currentScore;
 
     // The snake, with the head in the first position
     private ArrayList<Cell> snake;
@@ -128,6 +129,9 @@ public class SnakegameModel {
     public boolean getNewGame() {
         return newGame;
     }
+    public int currentScore (){
+        return currentScore;
+    }
 
     /**
      * Check whether two Cells have collided. This could be the
@@ -143,7 +147,7 @@ public class SnakegameModel {
     public boolean isCollision(Cell cell1, Cell cell2) {
         if (cell1.getX() == cell2.getX() && cell1.getY() == cell2.getY()) {
             // Grow the snake if there is a collision with a food item
-
+            currentScore ++;
             return true;
         } else {
             return false;
@@ -154,6 +158,7 @@ public class SnakegameModel {
         if (snakehead.getX() == wallTop || snakehead.getX() == wallBottom || snakehead.getY() == wallLeft
                 || snakehead.getY() == wallRight) {
             gameOver = true;
+            currentScore = 0;
             return true;
         } 
         else {
