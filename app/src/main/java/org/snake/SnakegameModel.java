@@ -174,8 +174,8 @@ public class SnakegameModel {
      *         in position 0
      */
     public ArrayList<Cell> initialiseSnake() {
-        int x = randomNumberGenerator.nextInt(boardSize / cellSize);
-        int y = randomNumberGenerator.nextInt(boardSize / cellSize);
+        int x = randomNumberGenerator.nextInt((boardSize / cellSize)-2)+1;
+        int y = randomNumberGenerator.nextInt((boardSize / cellSize)-2)+1;
         snake = new ArrayList<Cell>();
         Cell snakeHead = new Cell(x, y);
         snake.add(snakeHead);
@@ -188,8 +188,8 @@ public class SnakegameModel {
     }
 
     public Cell placeFood() {
-        int x = randomNumberGenerator.nextInt(boardSize / cellSize);
-        int y = randomNumberGenerator.nextInt(boardSize / cellSize);
+        int x = randomNumberGenerator.nextInt((boardSize / cellSize)-2)+1;
+        int y = randomNumberGenerator.nextInt((boardSize / cellSize)-2)+1;
         food = new Cell(x, y);
         return food;
     }
