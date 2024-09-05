@@ -7,6 +7,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
+
 import javax.swing.JPanel;
 import javax.swing.Timer;
 
@@ -64,12 +65,17 @@ public class GameboardPanel extends JPanel {
         // Draw the food
         graphic.setColor(Color.RED);
         graphic.fillRect(food.getX() * cellSize, food.getY() * cellSize, cellSize, cellSize);
+        
+        //display score 
+            graphic.drawString(String.valueOf(model.currentScore()), 6, 10);
+        
 
         // Display game over 
         if (model.isGameOver()){
             graphic.drawString("Game Over", 5, 10);
         }
     }
+
 
     private void prepareBoard(Graphics graphic) {
         int boardSize = model.getBoardSize();
@@ -92,7 +98,19 @@ public class GameboardPanel extends JPanel {
             int y = i * cellSize;
             graphic.drawLine(0, y, boardSize, y);
         }
+        for (int i=0; i<numColumns; i++){
+            graphic.setColor(Color.BLACK);
+            graphic.fillRect(0, i*cellSize, cellSize, cellSize);
+            graphic.fillRect(i*cellSize, 0, cellSize, cellSize);
+            graphic.fillRect((numColumns-1)*cellSize, i*cellSize, cellSize, cellSize);
+            graphic.fillRect(i*cellSize, (numColumns-1)*cellSize, cellSize, cellSize);
+
+    
+        }
+    
     }
+    
+
 
     private void startGame() {
         // Place the snake head randomly on the game board
@@ -134,11 +152,12 @@ public class GameboardPanel extends JPanel {
             }
 
             // Check for collision between snake head and food
-            if (model.isCollision(snakeHead,food)){
+            if (model.isCollisionFood()){
                food = model.placeFood();
     
             }
-            model.isCollisionWall(snakeHead);
+            model.isCollisionWall();
+            model.isCollisionBody();
 
         }
     }

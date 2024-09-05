@@ -1,7 +1,5 @@
 package org.snake;
-
 import javax.swing.*;
-
 import java.awt.*;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
