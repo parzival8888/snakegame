@@ -2,11 +2,15 @@ package org.snake;
 
 import java.awt.Color;
 import java.awt.Graphics;
+import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
+
+import javax.swing.ImageIcon;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.Timer;
 
@@ -19,9 +23,11 @@ public class GameboardPanel extends JPanel {
     private int cellSize;
     private int timerInterval;
     private char direction;
+    private JLabel scoreLabel;
 
-    public GameboardPanel(SnakegameModel model) {
+    public GameboardPanel(SnakegameModel model, JLabel scoreLabel) {
         this.model = model;
+        this.scoreLabel = scoreLabel;
         this.timerInterval = model.getTimerInterval();
         this.addKeyListener(new MyKeyAdapter()); // Key listener to handle direction changes via arrow keys
     }
@@ -52,6 +58,9 @@ public class GameboardPanel extends JPanel {
         graphic.setColor(Color.RED);
         graphic.fillRect(food.getX() * cellSize, food.getY() * cellSize, cellSize, cellSize);
 
+        // display score
+        graphic.drawString(String.valueOf(model.getCurrentScore()), 6, 10);
+
         // Display game over
         if (model.isGameOver()) {
             graphic.drawString("Game Over", 5, 10);
@@ -79,13 +88,14 @@ public class GameboardPanel extends JPanel {
             int y = i * cellSize;
             graphic.drawLine(0, y, boardSize, y);
         }
-        // Colour in the walls
-        graphic.setColor(Color.MAGENTA);
-        for (int i = 0; i < 18; i++) {
-            graphic.fillRect(i * cellSize, 0, cellSize, cellSize);
+
+        // Draw the game walls
+        for (int i = 0; i < numColumns; i++) {
+            graphic.setColor(Color.BLACK);
             graphic.fillRect(0, i * cellSize, cellSize, cellSize);
-            graphic.fillRect(i * cellSize, (numColumns - 1) * cellSize, cellSize, cellSize);
+            graphic.fillRect(i * cellSize, 0, cellSize, cellSize);
             graphic.fillRect((numColumns - 1) * cellSize, i * cellSize, cellSize, cellSize);
+            graphic.fillRect(i * cellSize, (numColumns - 1) * cellSize, cellSize, cellSize);
         }
     }
 
@@ -118,7 +128,6 @@ public class GameboardPanel extends JPanel {
             });
             timer.start(); // Start the timer
         }
-
     }
 
     private void moveSnake() {
@@ -141,6 +150,12 @@ public class GameboardPanel extends JPanel {
                     break;
             }
 
+            // Check for collision between snake head and food
+            if (model.isCollisionFood()) {
+                scoreLabel.setText("Score: " + model.getCurrentScore());
+                food = model.placeFood();
+            }
+
             // Move the snake body
             for (int i = snake.size() - 1; i > 0; i--) {
                 Cell bodySegment = snake.get(i);
@@ -149,14 +164,9 @@ public class GameboardPanel extends JPanel {
                 bodySegment.setY(prevBodySegment.getY());
             }
 
-            // Check for collision between snake head and food
-            if (model.isCollisionFood()) {
-                food = model.placeFood();
-
-            }
+            // Check for collisions with the game walls and the snake body
             model.isCollisionWall();
             model.isCollisionBody();
-            
         }
     }
 

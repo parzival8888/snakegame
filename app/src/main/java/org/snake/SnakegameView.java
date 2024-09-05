@@ -1,7 +1,5 @@
 package org.snake;
-
 import javax.swing.*;
-
 import java.awt.*;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
@@ -72,7 +70,7 @@ public class SnakegameView extends JFrame {
         createScorePanel();
 
         // Create the panel for the game board
-        gameboardPanel = new GameboardPanel(model);
+        gameboardPanel = new GameboardPanel(model, scoreLabel);
         model.setNewGame(true);
 
         // Add the game board panel and the game score / timer panel to the main game
