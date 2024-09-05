@@ -24,19 +24,6 @@ public class GameboardPanel extends JPanel {
         this.model = model;
         this.timerInterval = model.getTimerInterval();
         this.addKeyListener(new MyKeyAdapter()); // Key listener to handle direction changes via arrow keys
-        
-        // Create a timer that moves the snake. The timer delay is configurable
-        timer = new Timer(timerInterval, new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                moveSnake();
-                repaint(); // Request a repaint
-                if(model.isGameOver()) {
-                    timer.stop();
-                }
-            }
-        });
-        timer.start(); // Start the timer
     }
 
     @Override
@@ -65,8 +52,8 @@ public class GameboardPanel extends JPanel {
         graphic.setColor(Color.RED);
         graphic.fillRect(food.getX() * cellSize, food.getY() * cellSize, cellSize, cellSize);
 
-        // Display game over 
-        if (model.isGameOver()){
+        // Display game over
+        if (model.isGameOver()) {
             graphic.drawString("Game Over", 5, 10);
         }
     }
@@ -92,9 +79,17 @@ public class GameboardPanel extends JPanel {
             int y = i * cellSize;
             graphic.drawLine(0, y, boardSize, y);
         }
+        // Colour in the walls
+        graphic.setColor(Color.MAGENTA);
+        for (int i = 0; i < 18; i++) {
+            graphic.fillRect(i * cellSize, 0, cellSize, cellSize);
+            graphic.fillRect(0, i * cellSize, cellSize, cellSize);
+            graphic.fillRect(i * cellSize, (numColumns - 1) * cellSize, cellSize, cellSize);
+            graphic.fillRect((numColumns - 1) * cellSize, i * cellSize, cellSize, cellSize);
+        }
     }
 
-    private void startGame() {
+    public void startGame() {
         // Place the snake head randomly on the game board
         snake = model.getSnake();
         snakeHead = snake.get(0);
@@ -103,6 +98,27 @@ public class GameboardPanel extends JPanel {
         // Place a food item randomly on the game board
         food = model.getFoodLocation();
         System.out.println("Food positioned at x: " + food.getX());
+
+        // Create a timer that moves the snake. The timer delay is configurable
+        // Handle game restart. If the timer has already been created, restart it
+        if (timer != null && !timer.isRunning()) {
+            timer.restart();
+        } else if (timer == null) {
+            timer = new Timer(timerInterval, new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    moveSnake();
+                    setFocusable(true); // Make sure the panel can receive key events
+                    requestFocusInWindow(); // Request focus for key events
+                    repaint(); // Request a repaint
+                    if (model.isGameOver()) {
+                        timer.stop();
+                    }
+                }
+            });
+            timer.start(); // Start the timer
+        }
+
     }
 
     private void moveSnake() {
@@ -134,15 +150,16 @@ public class GameboardPanel extends JPanel {
             }
 
             // Check for collision between snake head and food
-            if (model.isCollision(snakeHead,food)){
-               food = model.placeFood();
-    
-            }
-            model.isCollisionWall(snakeHead);
+            if (model.isCollisionFood()) {
+                food = model.placeFood();
 
+            }
+            model.isCollisionWall();
+            model.isCollisionBody();
+            
         }
     }
-        
+
     // Handle pressing the arrow keys
     // First, get the snake direction from the model
     // Then use a 'switch' statement on the key pressed using e.getKeyCode()
@@ -156,7 +173,7 @@ public class GameboardPanel extends JPanel {
         public void keyPressed(KeyEvent e) {
             switch (e.getKeyCode()) {
                 case KeyEvent.VK_LEFT:
-                    if (model.getDirection() !=  'R') {
+                    if (model.getDirection() != 'R') {
                         model.setDirection('L');
                     }
                     break;
@@ -166,7 +183,7 @@ public class GameboardPanel extends JPanel {
                     }
                     break;
                 case KeyEvent.VK_UP:
-                    if (model.getDirection() !='D') {
+                    if (model.getDirection() != 'D') {
                         model.setDirection('U');
                     }
                     break;

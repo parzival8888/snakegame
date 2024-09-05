@@ -23,7 +23,7 @@ public class SnakegameView extends JFrame {
     // game board, and the score panel containing the score and the timer
     private JPanel gamePanel;
     // The game board panel
-    //private JPanel boardPanel;
+    // private JPanel boardPanel;
     // The panel containing the score and timer, displayed during gameplay
     private JPanel scorePanel;
     // The panel containing the leaderboard
@@ -98,7 +98,11 @@ public class SnakegameView extends JFrame {
         scorePanel.add(buttonNewGame);
 
         // Add listeners to handle button clicks
-        buttonNewGame.addActionListener(e -> model.setNewGame(true));
+        buttonNewGame.addActionListener(e -> {
+            // Create the panel for the game board
+            gameboardPanel.startGame();
+            model.setNewGame(true);
+        });
     }
 
     public void createStartPanel() {
@@ -139,8 +143,8 @@ public class SnakegameView extends JFrame {
     private void switchPanel(String text) {
         if (text == newGame) {
             cardLayout.show(mainPanel, newGame);
-            createGamePanel();
-            mainPanel.add(gamePanel, newGame);
+            //createGamePanel();
+            //mainPanel.add(gamePanel, newGame);
         } else if (text == gameLeaderboard)
             cardLayout.show(mainPanel, gameLeaderboard);
         else if (text == gameHistory)
@@ -161,5 +165,5 @@ public class SnakegameView extends JFrame {
     public void setTimer(int timer) {
         timerLabel.setText("Timer: " + timer);
     }
-    
+
 }

@@ -57,7 +57,7 @@ public class SnakegameModel {
 
         // Board Size needs to be perfectly divisible by the number of columns
         // Otherwise the board will show an additional part of a column
-        // Since the column size is calculated based on board size, this is 
+        // Since the column size is calculated based on board size, this is
         // just a slight adjustment, similar to rounding down to the nearest int
         this.boardSize = this.numberOfColumns * this.cellSize;
 
@@ -124,12 +124,14 @@ public class SnakegameModel {
 
     public void setNewGame(boolean newGame) {
         this.newGame = newGame;
+        gameOver = false;
     }
 
     public boolean getNewGame() {
         return newGame;
     }
-    public int currentScore (){
+
+    public int currentScore() {
         return currentScore;
     }
 
@@ -146,25 +148,46 @@ public class SnakegameModel {
      */
     public boolean isCollision(Cell cell1, Cell cell2) {
         if (cell1.getX() == cell2.getX() && cell1.getY() == cell2.getY()) {
-            // Grow the snake if there is a collision with a food item
-            currentScore ++;
             return true;
         } else {
             return false;
         }
     }
 
-    public boolean isCollisionWall(Cell snakehead) {
-        if (snakehead.getX() == wallTop || snakehead.getX() == wallBottom || snakehead.getY() == wallLeft
-                || snakehead.getY() == wallRight) {
+    public boolean isCollisionFood() {
+        Cell snakeHead = snake.get(0);
+        if (this.isCollision(snakeHead, food)) {
+            // Grow the snake if there is a collision with a food item
+            currentScore++;
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public boolean isCollisionWall() {
+        // Check for collision betwee the snake head and the game wall
+        Cell snakeHead = snake.get(0);        
+        if (snakeHead.getX() == wallTop || snakeHead.getX() == wallBottom || snakeHead.getY() == wallLeft
+                || snakeHead.getY() == wallRight) {
             gameOver = true;
             currentScore = 0;
             return true;
-        } 
-        else {
+        } else {
             return false;
         }
+    }
 
+    public boolean isCollisionBody() {
+        // Check for collision betwee the snake head and body
+        Cell snakeHead = snake.get(0);
+        for (int i = snake.size() - 1; i > 1; i--) {
+            Cell bodySegment = snake.get(i);
+            if (this.isCollision(snakeHead, bodySegment)) {
+                gameOver = true;
+            }
+        }
+        return gameOver;
     }
 
     /**
@@ -174,22 +197,27 @@ public class SnakegameModel {
      *         in position 0
      */
     public ArrayList<Cell> initialiseSnake() {
-        int x = randomNumberGenerator.nextInt(boardSize / cellSize);
-        int y = randomNumberGenerator.nextInt(boardSize / cellSize);
+        int x = randomNumberGenerator.nextInt(boardSize / cellSize - 2);
+        int y = randomNumberGenerator.nextInt(boardSize / cellSize - 2);
+        x++;
+        y++;
         snake = new ArrayList<Cell>();
         Cell snakeHead = new Cell(x, y);
         snake.add(snakeHead);
         for (int i = 0; i < snakeLength; i++) {
             Cell bodySegment = new Cell(x, y + i);
             snake.add(bodySegment);
+            System.out.println("initialiseSnake snake segment: " + bodySegment.getX() + ", " + bodySegment.getY());
         }
         System.out.println("Snake length in initialiseSnake is: " + snake.size());
+        // Set the initial direction for the snake
+        this.direction = 'U';
         return snake;
     }
 
     public Cell placeFood() {
-        int x = randomNumberGenerator.nextInt(boardSize / cellSize);
-        int y = randomNumberGenerator.nextInt(boardSize / cellSize);
+        int x = randomNumberGenerator.nextInt(boardSize / cellSize - 2);
+        int y = randomNumberGenerator.nextInt(boardSize / cellSize - 2);
         food = new Cell(x, y);
         return food;
     }
