@@ -6,7 +6,7 @@ package org.snake;
 public class App {
     public static void main(String[] args) {
 
-        // Create instances of the model, view, and controller
+        // Create instances of the model & view
         SnakegameModel model = new SnakegameModel();
         SnakegameView view = new SnakegameView(model);
 

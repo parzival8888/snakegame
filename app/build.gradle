@@ -20,20 +20,16 @@ repositories {
 dependencies {
     // This dependency is used by the application.
     implementation libs.guava
+    // https://mvnrepository.com/artifact/org.xerial/sqlite-jdbc
+    implementation 'org.xerial:sqlite-jdbc:3.45.3.0'
+    implementation 'org.json:json:20240303'
+    // JUnit 5 (Jupiter API and Engine for testing)
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.10.0'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.10.0'
 }
-
-testing {
-    suites {
-        // Configure the built-in test suite
-        test {
-            // Use JUnit4 test framework
-            useJUnit('4.13.2')
-        }
-    }
-}
-
 
 test {
+    useJUnitPlatform()
 	testLogging {
 		events "PASSED", "SKIPPED", "FAILED", "STANDARD_OUT", "STANDARD_ERROR"
         exceptionFormat "full"

@@ -2,32 +2,38 @@ package org.snake;
 
 import java.awt.Color;
 import java.awt.Graphics;
-import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 
-import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.Timer;
 
 public class GameboardPanel extends JPanel {
     private SnakegameModel model;
-    private Timer timer;
+    private Timer controlTimer;
+    private Timer gameTimer;
     private ArrayList<Cell> snake;
     private Cell snakeHead;
     private Cell food;
     private int cellSize;
     private int timerInterval;
+    private int gameTime;
     private char direction;
     private JLabel scoreLabel;
+    private JLabel gameTimerLabel;
+    private JLabel sessionTimerLabel;
 
-    public GameboardPanel(SnakegameModel model, JLabel scoreLabel) {
+    private static int sessionTimerInterval = 1000; // Will always be 1 second
+
+    public GameboardPanel(SnakegameModel model, JLabel scoreLabel, JLabel gameTimerLabel, JLabel sessionTimerLabel) {
         this.model = model;
         this.scoreLabel = scoreLabel;
+        this.gameTimerLabel = gameTimerLabel;
+        this.sessionTimerLabel = sessionTimerLabel;
         this.timerInterval = model.getTimerInterval();
         this.addKeyListener(new MyKeyAdapter()); // Key listener to handle direction changes via arrow keys
     }
@@ -38,10 +44,10 @@ public class GameboardPanel extends JPanel {
         setFocusable(true); // Make sure the panel can receive key events
         requestFocusInWindow(); // Request focus for key events
         if (model.getNewGame()) {
+            model.setNewGame(false);
             model.startNewGame();
             prepareBoard(graphic);
             startGame();
-            model.setNewGame(false);
         }
         prepareBoard(graphic);
 
@@ -58,11 +64,10 @@ public class GameboardPanel extends JPanel {
         graphic.setColor(Color.RED);
         graphic.fillRect(food.getX() * cellSize, food.getY() * cellSize, cellSize, cellSize);
 
-        // display score
-        graphic.drawString(String.valueOf(model.getCurrentScore()), 6, 10);
-
         // Display game over
-        if (model.isGameOver()) {
+        if (model.isTimeAllocationUsed()) {
+            graphic.drawString("Game Over. You have used your time allocation for today!", 5, 10);
+        } else if (model.isGameOver()) {
             graphic.drawString("Game Over", 5, 10);
         }
     }
@@ -100,6 +105,8 @@ public class GameboardPanel extends JPanel {
     }
 
     public void startGame() {
+        scoreLabel.setText("Score: " + model.getCurrentScore());
+
         // Place the snake head randomly on the game board
         snake = model.getSnake();
         snakeHead = snake.get(0);
@@ -111,10 +118,10 @@ public class GameboardPanel extends JPanel {
 
         // Create a timer that moves the snake. The timer delay is configurable
         // Handle game restart. If the timer has already been created, restart it
-        if (timer != null && !timer.isRunning()) {
-            timer.restart();
-        } else if (timer == null) {
-            timer = new Timer(timerInterval, new ActionListener() {
+        if (controlTimer != null && !controlTimer.isRunning()) {
+            controlTimer.restart();
+        } else if (controlTimer == null) {
+            controlTimer = new Timer(timerInterval, new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     moveSnake();
@@ -122,12 +129,37 @@ public class GameboardPanel extends JPanel {
                     requestFocusInWindow(); // Request focus for key events
                     repaint(); // Request a repaint
                     if (model.isGameOver()) {
-                        timer.stop();
+                        handleGameOver();
                     }
                 }
             });
-            timer.start(); // Start the timer
+            controlTimer.start(); // Start the timer
         }
+        // Display the total game play time for the current day
+        sessionTimerLabel.setText("Session time: " + model.getCurrentSessionTime());
+
+        // Create a timer that tracks time played for each game
+        if (gameTimer == null) {
+            gameTimer = new Timer(sessionTimerInterval, new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    // Update the label with the elapsed time
+                    gameTime++;
+                    gameTimerLabel.setText("Game time: " + gameTime);
+                }
+            });
+            gameTimer.start(); // Start the timer
+        }
+    }
+
+    private void handleGameOver() {
+        controlTimer.stop();
+        gameTimer.stop();
+        gameTimer = null;
+        model.storeGameTime(gameTime);
+        // Display the total game play time for the current day
+        sessionTimerLabel.setText("Session time: " + model.getCurrentSessionTime());
+        gameTime = 0;
     }
 
     private void moveSnake() {

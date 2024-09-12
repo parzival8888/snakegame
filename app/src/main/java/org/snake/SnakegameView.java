@@ -1,14 +1,20 @@
 package org.snake;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 public class SnakegameView extends JFrame {
     private SnakegameModel model;
     private JLabel scoreLabel;
-    private JLabel timerLabel;
+    private JLabel gameTimerLabel;
+    private JLabel sessionTimerLabel;
     private JButton buttonNewGame;
+    private JButton buttonMenu;
     private GameboardPanel gameboardPanel;
 
     // The main panel manages the other panels and switches between the game panel,
@@ -30,6 +36,7 @@ public class SnakegameView extends JFrame {
     private CardLayout cardLayout;
     private static String start = "Start";
     private static String newGame = "New Game";
+    private static String menu = "Menu";
     private static String gameHistory = "Game History";
     private static String gameLeaderboard = "Leaderboard";
 
@@ -38,14 +45,13 @@ public class SnakegameView extends JFrame {
 
     public SnakegameView(SnakegameModel model) {
         this.model = model;
-        System.out.println("Board size will be set to: " + model.getBoardSize());
         setTitle(model.getGameTitle());
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         createStartPanel();
         createGamePanel();
         createMainPanel();
-        // createLeaderboardPanel();
+        createLeaderboardPanel();
         add(mainPanel);
         // The size of the frame will be the size of the game board plus
         // a little extra (10%) to cater for the score and timer bar
@@ -70,7 +76,7 @@ public class SnakegameView extends JFrame {
         createScorePanel();
 
         // Create the panel for the game board
-        gameboardPanel = new GameboardPanel(model, scoreLabel);
+        gameboardPanel = new GameboardPanel(model, scoreLabel, gameTimerLabel, sessionTimerLabel);
         model.setNewGame(true);
 
         // Add the game board panel and the game score / timer panel to the main game
@@ -82,24 +88,34 @@ public class SnakegameView extends JFrame {
 
     private void createScorePanel() {
         // Create the panel for the game score and game timer
-        scorePanel = new JPanel(new GridLayout(1, 3, 10, 10)); // 1 row, 3 columns, 10px gap
+        scorePanel = new JPanel(new GridLayout(1, 5, 10, 10)); // 1 row, 3 columns, 10px gap
 
         scoreLabel = new JLabel("Score:");
         scoreLabel.setHorizontalAlignment(SwingConstants.LEFT);
-        timerLabel = new JLabel("Timer:");
-        timerLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        gameTimerLabel = new JLabel("Game time:");
+        gameTimerLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        sessionTimerLabel = new JLabel("Session time:");
+        sessionTimerLabel.setHorizontalAlignment(SwingConstants.CENTER);
         buttonNewGame = new JButton(newGame);
         buttonNewGame.setAlignmentX(SwingConstants.RIGHT);
+        buttonMenu = new JButton(menu);
+        buttonMenu.setAlignmentX(SwingConstants.RIGHT);
 
         scorePanel.add(scoreLabel);
-        scorePanel.add(timerLabel);
+        scorePanel.add(gameTimerLabel);
+        scorePanel.add(sessionTimerLabel);
         scorePanel.add(buttonNewGame);
+        scorePanel.add(buttonMenu);
 
-        // Add listeners to handle button clicks
+        // Start a new game
         buttonNewGame.addActionListener(e -> {
-            // Create the panel for the game board
             gameboardPanel.startGame();
             model.setNewGame(true);
+        });
+
+        // Show the menu panel
+        buttonMenu.addActionListener(e -> {
+            switchPanel(buttonMenu.getText());
         });
     }
 
@@ -131,18 +147,55 @@ public class SnakegameView extends JFrame {
     private void createLeaderboardPanel() {
         // Create the panel for the leaderboard
         leaderboardPanel = new JPanel();
-
-        JLabel headingLabel = new JLabel("Leaderboard:");
+        leaderboardPanel.setLayout(new BoxLayout(leaderboardPanel, BoxLayout.Y_AXIS));
+        JButton buttonMenu = new JButton(menu);
+        buttonMenu.setAlignmentX(Component.CENTER_ALIGNMENT);
+        JLabel headingLabel = new JLabel("Leaderboard");
         headingLabel.setHorizontalAlignment(SwingConstants.LEFT);
         leaderboardPanel.add(headingLabel);
+        buttonMenu.setHorizontalAlignment(SwingConstants.RIGHT);
+        leaderboardPanel.add(buttonMenu);
         mainPanel.add(leaderboardPanel, gameLeaderboard);
+
+        // Show the menu panel
+        buttonMenu.addActionListener(e -> {
+            switchPanel(buttonMenu.getText());
+        });
+
+        // Get the leaderboard from the model
+        JSONArray leaderBoard = model.getLeaderboard();
+
+        if (leaderBoard.length() > 0) {
+            // Extract column names
+            String[] columnNames = JSONObject.getNames(leaderBoard.getJSONObject(0));
+
+            // Create data array for JTable
+            Object[][] data = new Object[leaderBoard.length()][columnNames.length];
+
+            // Loop through the JSONArray and extract the values
+            for (int i = 0; i < leaderBoard.length(); i++) {
+                JSONObject obj = leaderBoard.getJSONObject(i);
+                for (int j = 0; j < columnNames.length; j++) {
+                    data[i][j] = obj.get(columnNames[j]);
+                }
+            }
+
+            // Create the JTable with data and column names
+            JTable table = new JTable(data, columnNames);
+
+            // Add the JTable to a JScrollPane
+            JScrollPane scrollPane = new JScrollPane(table);
+
+            // Add the JScrollPane to the JPanel
+            leaderboardPanel.add(scrollPane, BorderLayout.SOUTH);
+        }
     }
 
     private void switchPanel(String text) {
         if (text == newGame) {
             cardLayout.show(mainPanel, newGame);
-            //createGamePanel();
-            //mainPanel.add(gamePanel, newGame);
+            // createGamePanel();
+            // mainPanel.add(gamePanel, newGame);
         } else if (text == gameLeaderboard)
             cardLayout.show(mainPanel, gameLeaderboard);
         else if (text == gameHistory)
@@ -155,13 +208,4 @@ public class SnakegameView extends JFrame {
         if (!(buttonNewGame == null))
             buttonNewGame.addActionListener(listenForButton);
     }
-
-    public void setScore(int score) {
-        scoreLabel.setText("Score: " + score);
-    }
-
-    public void setTimer(int timer) {
-        timerLabel.setText("Timer: " + timer);
-    }
-
 }

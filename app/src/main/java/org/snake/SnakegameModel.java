@@ -1,10 +1,16 @@
 package org.snake;
 
 import java.awt.Color;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Random;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 import org.snake.util.ConfigReader;
+import org.snake.util.DataHandler;
 
 public class SnakegameModel {
     private static String configFilename = "snakegame.config";
@@ -16,6 +22,7 @@ public class SnakegameModel {
     private Color boardGridColour;
     private boolean gameOver;
     private boolean newGame;
+    private boolean dailyTimeUsed;
     private int timerInterval;
     private char direction;
     private int snakeLength;
@@ -24,6 +31,9 @@ public class SnakegameModel {
     private int wallLeft;
     private int wallRight;
     private int currentScore;
+    private int gameTimeAllowed;
+    private int currentSessionTime;
+    private DataHandler dataHandler;
 
     // The snake, with the head in the first position
     private ArrayList<Cell> snake;
@@ -32,6 +42,7 @@ public class SnakegameModel {
 
     public SnakegameModel() {
         readConfig();
+        dataHandler = new DataHandler();
         this.gameOver = false;
     }
 
@@ -46,10 +57,11 @@ public class SnakegameModel {
         this.boardGridColour = Color.decode(ConfigReader.getProperty("boardgridcolour"));
         this.timerInterval = Integer.parseInt(ConfigReader.getProperty("timerinterval"));
         this.direction = ConfigReader.getProperty("startdirection").charAt(0);
+        this.gameTimeAllowed = Integer.parseInt(ConfigReader.getProperty("gametimeallowed"));
 
         System.out.println("game title is: " + this.gameTitle);
         System.out.println("board size is: " + this.boardSize);
-        System.out.println("time interval is" + this.timerInterval);
+        System.out.println("time interval is: " + this.timerInterval);
 
         // Board Size needs to be perfectly divisible by the number of columns
         // Otherwise the board will show an additional part of a column
@@ -118,6 +130,10 @@ public class SnakegameModel {
         return gameOver;
     }
 
+    public boolean isTimeAllocationUsed() {
+        return dailyTimeUsed;
+    }
+
     public void setNewGame(boolean newGame) {
         this.newGame = newGame;
         gameOver = false;
@@ -129,6 +145,34 @@ public class SnakegameModel {
 
     public int getCurrentScore() {
         return currentScore;
+    }
+
+    public int getGameTimeAllowed() {
+        return gameTimeAllowed;
+    }
+
+    public int getCurrentSessionTime() {
+        return currentSessionTime;
+    }
+
+    public int getSessionTime() {
+        int sessionTime;
+        LocalDateTime currentTime = LocalDateTime.now();
+        // Define the format pattern
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        // Format the current date and time into a string
+        String formattedDateTime = currentTime.format(formatter);
+        JSONObject sessionInfo = new JSONObject(dataHandler.readSessionTableByDate(formattedDateTime));
+        if (sessionInfo.isEmpty())
+            sessionTime = 0;
+        else
+            sessionTime = sessionInfo.getInt("duration");
+        return sessionTime;
+    }
+
+    public JSONArray getLeaderboard() {
+        JSONArray leaderboard = new JSONArray(dataHandler.readLeaderboard());
+        return leaderboard;
     }
 
     /**
@@ -219,8 +263,24 @@ public class SnakegameModel {
         return food;
     }
 
-    public void startNewGame() {
+    public void storeGameTime(int gameTime) {
+        this.currentSessionTime += gameTime;
+        dataHandler.insertSessionTable(currentSessionTime);
+        dataHandler.insertGameTable(gameTime, currentScore);
+    }
+
+    public boolean startNewGame() {
         this.initialiseSnake();
         this.placeFood();
+        this.currentSessionTime = this.getSessionTime();
+        // Players may only play for a specified period of time per day
+        if (this.currentSessionTime > this.gameTimeAllowed) {
+            this.dailyTimeUsed = true;
+            this.gameOver = true;
+        } 
+        else {
+            this.dailyTimeUsed = false;
+        }
+        return this.gameOver;
     }
 }
