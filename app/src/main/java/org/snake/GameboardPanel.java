@@ -7,7 +7,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
-
+import java.awt.Font;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.Timer;
@@ -68,7 +68,11 @@ public class GameboardPanel extends JPanel {
         if (model.isTimeAllocationUsed()) {
             graphic.drawString("Game Over. You have used your time allocation for today!", 5, 10);
         } else if (model.isGameOver()) {
-            graphic.drawString("Game Over", 5, 10);
+            String gameOverMessage = "Game Over";
+            Font stringFont = new Font("SansSerif", Font.PLAIN, 30);
+            graphic.setFont(stringFont);
+            graphic.drawString(gameOverMessage, 280, 220);
+
         }
     }
 
