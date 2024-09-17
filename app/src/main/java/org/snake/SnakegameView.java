@@ -32,6 +32,7 @@ public class SnakegameView extends JFrame {
     private JPanel scorePanel;
     // The panel containing the leaderboard
     private JPanel leaderboardPanel;
+    private JPanel gameHistoryPanel;
 
     private CardLayout cardLayout;
     private static String start = "Start";
@@ -52,6 +53,7 @@ public class SnakegameView extends JFrame {
         createGamePanel();
         createMainPanel();
         createLeaderboardPanel();
+        createGameHistoryPanel();
         add(mainPanel);
         // The size of the frame will be the size of the game board plus
         // a little extra (10%) to cater for the score and timer bar
@@ -142,6 +144,7 @@ public class SnakegameView extends JFrame {
         // Add listeners to handle button clicks
         buttonNewGame.addActionListener(e -> switchPanel(buttonNewGame.getText()));
         buttonLeaderboard.addActionListener(e -> switchPanel(buttonLeaderboard.getText()));
+        buttonGameHistory.addActionListener(e-> switchPanel(buttonGameHistory.getText()));
     }
 
     private void createLeaderboardPanel() {
@@ -190,6 +193,54 @@ public class SnakegameView extends JFrame {
             leaderboardPanel.add(scrollPane, BorderLayout.SOUTH);
         }
     }
+
+    private void createGameHistoryPanel() {
+        // Create the panel for the game history
+        gameHistoryPanel = new JPanel();
+        gameHistoryPanel.setLayout(new BoxLayout(gameHistoryPanel, BoxLayout.Y_AXIS));
+        JButton buttonMenu = new JButton(menu);
+        buttonMenu.setAlignmentX(Component.CENTER_ALIGNMENT);
+        JLabel headingLabel = new JLabel("game history");
+        headingLabel.setHorizontalAlignment(SwingConstants.LEFT);
+        gameHistoryPanel.add(headingLabel);
+        buttonMenu.setHorizontalAlignment(SwingConstants.RIGHT);
+        gameHistoryPanel.add(buttonMenu);
+        mainPanel.add(gameHistoryPanel, gameHistory);
+
+        // Show the menu panel
+        buttonMenu.addActionListener(e -> {
+            switchPanel(buttonMenu.getText());
+        });
+
+        // Get the leaderboard from the model
+        JSONArray gameHistory = model.getGameHistory();
+
+        if (gameHistory.length() > 0) {
+            // Extract column names
+            String[] columnNames = JSONObject.getNames(gameHistory.getJSONObject(0));
+
+            // Create data array for JTable
+            Object[][] data = new Object[gameHistory.length()][columnNames.length];
+
+            // Loop through the JSONArray and extract the values
+            for (int i = 0; i < gameHistory.length(); i++) {
+                JSONObject obj = gameHistory.getJSONObject(i);
+                for (int j = 0; j < columnNames.length; j++) {
+                    data[i][j] = obj.get(columnNames[j]);
+                }
+            }
+
+            // Create the JTable with data and column names
+            JTable table = new JTable(data, columnNames);
+
+            // Add the JTable to a JScrollPane
+            JScrollPane scrollPane = new JScrollPane(table);
+
+            // Add the JScrollPane to the JPanel
+            gameHistoryPanel.add(scrollPane, BorderLayout.SOUTH);
+        }
+    }
+
 
     private void switchPanel(String text) {
         if (text == newGame) {

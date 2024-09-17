@@ -32,6 +32,7 @@ public class SnakegameModel {
     private int wallRight;
     private int currentScore;
     private int gameTimeAllowed;
+    private int topSomething;
     private int currentSessionTime;
     private DataHandler dataHandler;
 
@@ -58,6 +59,7 @@ public class SnakegameModel {
         this.timerInterval = Integer.parseInt(ConfigReader.getProperty("timerinterval"));
         this.direction = ConfigReader.getProperty("startdirection").charAt(0);
         this.gameTimeAllowed = Integer.parseInt(ConfigReader.getProperty("gametimeallowed"));
+        this.topSomething = Integer.parseInt(ConfigReader.getProperty("topsomething"));
 
         System.out.println("game title is: " + this.gameTitle);
         System.out.println("board size is: " + this.boardSize);
@@ -154,6 +156,7 @@ public class SnakegameModel {
     public int getCurrentSessionTime() {
         return currentSessionTime;
     }
+    
 
     public int getSessionTime() {
         int sessionTime;
@@ -171,8 +174,12 @@ public class SnakegameModel {
     }
 
     public JSONArray getLeaderboard() {
-        JSONArray leaderboard = new JSONArray(dataHandler.readLeaderboard());
+        JSONArray leaderboard = new JSONArray(dataHandler.readLeaderboard(topSomething));
         return leaderboard;
+    }
+    public JSONArray getGameHistory() {
+        JSONArray gameHistory = new JSONArray(dataHandler.readDurationPlayed());
+        return gameHistory;
     }
 
     /**

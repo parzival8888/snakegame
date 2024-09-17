@@ -32,7 +32,9 @@ public class DataHandler {
     private static String readGameSQL = "SELECT * FROM game_history";
 
     // Read the leaderboard from the game table
-    private static String readLeaderboardSQL = "SELECT * FROM game_history ORDER BY score DESC";
+    private static String readLeaderboardSQL = "SELECT * FROM game_history ORDER BY score DESC LIMIT ?";
+    // Read the total duration played by date from the game table
+    private static String readTotalDurationSQL = "SELECT strftime('%Y-%m-%d', timestamp) AS date, sum(duration) AS total_duration FROM game_history GROUP BY strftime('%Y-%m-%d', timestamp);";
 
     // Retrieve the rowId of the last inserted row
     private String rowIdSql = "SELECT last_insert_rowid()";
@@ -80,12 +82,13 @@ public class DataHandler {
         return jsonArray.toString();
     }
 
-    public String readLeaderboard() {
+    public String readLeaderboard(int topSomething) {
         JSONArray jsonArray = new JSONArray();
         try {
             conn = DriverManager.getConnection(connectionURL);
-            Statement stmtRead = conn.createStatement();
-            ResultSet rs = stmtRead.executeQuery(readLeaderboardSQL);
+            PreparedStatement pstmtSelect = conn.prepareStatement(readLeaderboardSQL);
+            pstmtSelect.setInt(1, topSomething);
+            ResultSet rs = pstmtSelect.executeQuery();
 
             while (rs.next()) {
                 JSONObject jsonObject = new JSONObject();
@@ -95,7 +98,28 @@ public class DataHandler {
                 jsonArray.put(jsonObject);
             }
 
-            stmtRead.close();
+            pstmtSelect.close();
+            conn.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return jsonArray.toString();
+    }
+    public String readDurationPlayed() {
+        JSONArray jsonArray = new JSONArray();
+        try {
+            conn = DriverManager.getConnection(connectionURL);
+            Statement stmtSelect = conn.createStatement();
+            ResultSet rs = stmtSelect.executeQuery(readTotalDurationSQL);
+
+            while (rs.next()) {
+                JSONObject jsonObject = new JSONObject();
+                jsonObject.put("total_duration", rs.getInt("total_duration"));
+                jsonObject.put("date", rs.getString("date"));
+                jsonArray.put(jsonObject);
+            }
+
+            stmtSelect.close();
             conn.close();
         } catch (SQLException e) {
             e.printStackTrace();
