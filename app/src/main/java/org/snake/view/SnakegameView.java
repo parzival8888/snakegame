@@ -1,12 +1,16 @@
-package org.snake;
+package org.snake.view;
 
 import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
+
 import java.awt.*;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.snake.model.SnakegameModel;
+import org.snake.util.Cell;
 
 public class SnakegameView extends JFrame {
     private SnakegameModel model;
@@ -16,6 +20,10 @@ public class SnakegameView extends JFrame {
     private JButton buttonNewGame;
     private JButton buttonMenu;
     private GameboardPanel gameboardPanel;
+    private JTable leaderboardTable;
+    private DefaultTableModel leaderboardTableModel;
+    private JTable gameHistoryTable;
+    private DefaultTableModel gameHistoryTableModel;
 
     // The main panel manages the other panels and switches between the game panel,
     // start panel, etc.
@@ -26,12 +34,11 @@ public class SnakegameView extends JFrame {
     // The game panel, which contains two sub-panels: the board panel holding the
     // game board, and the score panel containing the score and the timer
     private JPanel gamePanel;
-    // The game board panel
-    // private JPanel boardPanel;
     // The panel containing the score and timer, displayed during gameplay
     private JPanel scorePanel;
     // The panel containing the leaderboard
     private JPanel leaderboardPanel;
+    // The panel containing the game history
     private JPanel gameHistoryPanel;
 
     private CardLayout cardLayout;
@@ -144,7 +151,7 @@ public class SnakegameView extends JFrame {
         // Add listeners to handle button clicks
         buttonNewGame.addActionListener(e -> switchPanel(buttonNewGame.getText()));
         buttonLeaderboard.addActionListener(e -> switchPanel(buttonLeaderboard.getText()));
-        buttonGameHistory.addActionListener(e-> switchPanel(buttonGameHistory.getText()));
+        buttonGameHistory.addActionListener(e -> switchPanel(buttonGameHistory.getText()));
     }
 
     private void createLeaderboardPanel() {
@@ -164,7 +171,17 @@ public class SnakegameView extends JFrame {
         buttonMenu.addActionListener(e -> {
             switchPanel(buttonMenu.getText());
         });
+        leaderboardTable = new JTable();
 
+        // Add the JTable to a JScrollPane
+        JScrollPane scrollPane = new JScrollPane(leaderboardTable);
+
+        // Add the JScrollPane to the JPanel
+        leaderboardPanel.add(scrollPane, BorderLayout.SOUTH);
+        this.getLeaderboard();
+    }
+
+    private void getLeaderboard() {
         // Get the leaderboard from the model
         JSONArray leaderBoard = model.getLeaderboard();
 
@@ -183,14 +200,14 @@ public class SnakegameView extends JFrame {
                 }
             }
 
-            // Create the JTable with data and column names
-            JTable table = new JTable(data, columnNames);
-
-            // Add the JTable to a JScrollPane
-            JScrollPane scrollPane = new JScrollPane(table);
-
-            // Add the JScrollPane to the JPanel
-            leaderboardPanel.add(scrollPane, BorderLayout.SOUTH);
+            // Update the JTable with data and column names
+            if (leaderboardTableModel == null) {
+                leaderboardTableModel = new DefaultTableModel(data, columnNames);
+                leaderboardTable.setModel(leaderboardTableModel);
+            } else {
+                leaderboardTableModel.setDataVector(data, columnNames);
+                leaderboardTableModel.fireTableDataChanged();
+            }
         }
     }
 
@@ -212,6 +229,18 @@ public class SnakegameView extends JFrame {
             switchPanel(buttonMenu.getText());
         });
 
+        // Create the JTable with data and column names
+        gameHistoryTable = new JTable();
+
+        // Add the JTable to a JScrollPane
+        JScrollPane scrollPane = new JScrollPane(gameHistoryTable);
+
+        // Add the JScrollPane to the JPanel
+        gameHistoryPanel.add(scrollPane, BorderLayout.SOUTH);
+        this.getGameHistory();
+    }
+
+    private void getGameHistory() {
         // Get the leaderboard from the model
         JSONArray gameHistory = model.getGameHistory();
 
@@ -230,28 +259,29 @@ public class SnakegameView extends JFrame {
                 }
             }
 
-            // Create the JTable with data and column names
-            JTable table = new JTable(data, columnNames);
-
-            // Add the JTable to a JScrollPane
-            JScrollPane scrollPane = new JScrollPane(table);
-
-            // Add the JScrollPane to the JPanel
-            gameHistoryPanel.add(scrollPane, BorderLayout.SOUTH);
+            // Update the JTable with data and column names
+            if (gameHistoryTableModel == null) {
+                gameHistoryTableModel = new DefaultTableModel(data, columnNames);
+                gameHistoryTable.setModel(gameHistoryTableModel);
+            } else {
+                gameHistoryTableModel.setDataVector(data, columnNames);
+                gameHistoryTableModel.fireTableDataChanged();
+            }
         }
     }
-
 
     private void switchPanel(String text) {
         if (text == newGame) {
             cardLayout.show(mainPanel, newGame);
             // createGamePanel();
             // mainPanel.add(gamePanel, newGame);
-        } else if (text == gameLeaderboard)
+        } else if (text == gameLeaderboard) {
             cardLayout.show(mainPanel, gameLeaderboard);
-        else if (text == gameHistory)
+            this.getLeaderboard();
+        } else if (text == gameHistory) {
             cardLayout.show(mainPanel, gameHistory);
-        else
+            this.getGameHistory();            
+        } else
             cardLayout.show(mainPanel, start);
     }
 
