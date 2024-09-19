@@ -1,4 +1,4 @@
-package org.snake;
+package org.snake.model;
 
 import java.awt.Color;
 import java.time.LocalDateTime;
@@ -8,9 +8,9 @@ import java.util.Random;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
-
+import org.snake.database.DataHandler;
+import org.snake.util.Cell;
 import org.snake.util.ConfigReader;
-import org.snake.util.DataHandler;
 
 public class SnakegameModel {
     private static String configFilename = "snakegame.config";
@@ -43,7 +43,13 @@ public class SnakegameModel {
 
     public SnakegameModel() {
         readConfig();
-        dataHandler = new DataHandler();
+        this.dataHandler = new DataHandler();
+        this.gameOver = false;
+    }
+
+    public SnakegameModel(DataHandler dataHandler) {
+        readConfig();
+        this.dataHandler = dataHandler;
         this.gameOver = false;
     }
 
@@ -156,7 +162,6 @@ public class SnakegameModel {
     public int getCurrentSessionTime() {
         return currentSessionTime;
     }
-    
 
     public int getSessionTime() {
         int sessionTime;
@@ -177,6 +182,7 @@ public class SnakegameModel {
         JSONArray leaderboard = new JSONArray(dataHandler.readLeaderboard(topSomething));
         return leaderboard;
     }
+
     public JSONArray getGameHistory() {
         JSONArray gameHistory = new JSONArray(dataHandler.readDurationPlayed());
         return gameHistory;

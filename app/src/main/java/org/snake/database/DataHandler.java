@@ -1,4 +1,4 @@
-package org.snake.util;
+package org.snake.database;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -33,6 +33,7 @@ public class DataHandler {
 
     // Read the leaderboard from the game table
     private static String readLeaderboardSQL = "SELECT * FROM game_history ORDER BY score DESC LIMIT ?";
+
     // Read the total duration played by date from the game table
     private static String readTotalDurationSQL = "SELECT strftime('%Y-%m-%d', timestamp) AS date, sum(duration) AS total_duration FROM game_history GROUP BY strftime('%Y-%m-%d', timestamp);";
 
@@ -105,6 +106,12 @@ public class DataHandler {
         }
         return jsonArray.toString();
     }
+
+    /**
+     * Not used??
+     * 
+     * @return
+     */
     public String readDurationPlayed() {
         JSONArray jsonArray = new JSONArray();
         try {
@@ -114,8 +121,8 @@ public class DataHandler {
 
             while (rs.next()) {
                 JSONObject jsonObject = new JSONObject();
-                jsonObject.put("total_duration", rs.getInt("total_duration"));
                 jsonObject.put("date", rs.getString("date"));
+                jsonObject.put("total_duration", rs.getInt("total_duration"));
                 jsonArray.put(jsonObject);
             }
 

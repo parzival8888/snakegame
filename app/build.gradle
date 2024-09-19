@@ -23,19 +23,27 @@ dependencies {
     // https://mvnrepository.com/artifact/org.xerial/sqlite-jdbc
     implementation 'org.xerial:sqlite-jdbc:3.45.3.0'
     implementation 'org.json:json:20240303'
+    implementation 'org.slf4j:slf4j-api:1.7.32'
     // JUnit 5 (Jupiter API and Engine for testing)
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.10.0'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.10.0'
+    // Mockito dependency
+    testImplementation 'org.mockito:mockito-core:5.5.0'
+    // For using Mockito with JUnit 5 (Optional)
+    testImplementation 'org.mockito:mockito-junit-jupiter:5.5.0'
 }
 
 test {
     useJUnitPlatform()
 	testLogging {
-		events "PASSED", "SKIPPED", "FAILED", "STANDARD_OUT", "STANDARD_ERROR"
+		events "PASSED", "SKIPPED", "FAILED", "STANDARD_OUT"
         exceptionFormat "full"
 	}
 }
 
+tasks.withType(org.gradle.api.tasks.testing.Test).each { test ->
+    test.systemProperty('net.bytebuddy.disable_agent', 'true')
+}
 
 // Apply a specific Java toolchain to ease working on different environments.
 java {

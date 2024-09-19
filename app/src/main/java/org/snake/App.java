@@ -3,6 +3,9 @@
  */
 package org.snake;
 
+import org.snake.model.SnakegameModel;
+import org.snake.view.SnakegameView;
+
 public class App {
     public static void main(String[] args) {
 

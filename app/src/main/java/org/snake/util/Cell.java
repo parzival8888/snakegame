@@ -1,4 +1,4 @@
-package org.snake;
+package org.snake.util;
 
 public class Cell {
     private int x;

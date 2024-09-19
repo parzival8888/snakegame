@@ -1,7 +1,8 @@
-package org.snake.util;
+package org.snake.database;
 
 import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.*;
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -113,7 +114,7 @@ public class DataHandlerTest {
         dataHandler.createGameTable();
         dataHandler.insertGameTable(120, 500);
         dataHandler.insertGameTable(150, 1000);
-        String leaderboardData = dataHandler.readLeaderboard();
+        String leaderboardData = dataHandler.readLeaderboard(5);
 
         assertNotNull(leaderboardData, "Returned JSON data should not be null");
         assertTrue(leaderboardData.contains("1000"), "Leaderboard should contain the highest score");

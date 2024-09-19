@@ -1,4 +1,4 @@
-package org.snake;
+package org.snake.view;
 
 import java.awt.Color;
 import java.awt.Graphics;
@@ -7,10 +7,13 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
-import java.awt.Font;
+
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.Timer;
+
+import org.snake.model.SnakegameModel;
+import org.snake.util.Cell;
 
 public class GameboardPanel extends JPanel {
     private SnakegameModel model;
@@ -68,11 +71,7 @@ public class GameboardPanel extends JPanel {
         if (model.isTimeAllocationUsed()) {
             graphic.drawString("Game Over. You have used your time allocation for today!", 5, 10);
         } else if (model.isGameOver()) {
-            String gameOverMessage = "Game Over";
-            Font stringFont = new Font("SansSerif", Font.PLAIN, 30);
-            graphic.setFont(stringFont);
-            graphic.drawString(gameOverMessage, 280, 220);
-
+            graphic.drawString("Game Over", 5, 10);
         }
     }
 
