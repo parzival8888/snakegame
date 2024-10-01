@@ -1,6 +1,7 @@
 package org.snake.view;
 
 import javax.swing.*;
+import javax.swing.border.BevelBorder;
 import javax.swing.table.DefaultTableModel;
 
 import java.awt.*;
@@ -131,8 +132,9 @@ public class SnakegameView extends JFrame {
     public void createStartPanel() {
         // Create the panel for the game start, with appropriate menu options
         startPanel = new JPanel();
-        startPanel.setLayout(new BoxLayout(startPanel, BoxLayout.Y_AXIS));
-        startPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        // startPanel.setLayout(new BoxLayout(startPanel, BoxLayout.Y_AXIS));
+        startPanel.setLayout(new GridLayout(4, 1, 10, 10));
+        startPanel.setBorder(BorderFactory.createEmptyBorder(10, 100, 10, 100));
 
         // Add buttons to the startPanel
         JButton buttonNewGame = new JButton(newGame);
@@ -141,12 +143,31 @@ public class SnakegameView extends JFrame {
         buttonLeaderboard.setAlignmentX(Component.CENTER_ALIGNMENT);
         JButton buttonGameHistory = new JButton(gameHistory);
         buttonGameHistory.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        // Big font for the buttons
+        Font buttonFont = new Font("Arial", Font.BOLD, 24);
+        buttonNewGame.setFont(buttonFont);
+        buttonLeaderboard.setFont(buttonFont);
+        buttonGameHistory.setFont(buttonFont);
+        buttonNewGame.setBackground(Color.GRAY);
+        buttonNewGame.setForeground(Color.BLUE);
+        buttonNewGame.setBorder(new BevelBorder(BevelBorder.RAISED));
+        buttonNewGame.setOpaque(true);
+
         startPanel.add(buttonNewGame);
-        startPanel.add(Box.createVerticalStrut(10)); // Add space between buttons
         startPanel.add(buttonLeaderboard);
-        startPanel.add(Box.createVerticalStrut(10));
         startPanel.add(buttonGameHistory);
-        startPanel.add(Box.createVerticalStrut(10));
+
+        // Create a label for "How to Play" 
+        JLabel howToPlayLabel = new JLabel("<html><div style='text-align: center;'>"
+                + "<h2>How to Play</h2>"
+                + "Use arrow keys to move the snake.<br>"
+                + "Eat food to grow bigger.<br>"
+                + "Avoid hitting the walls or yourself.</div></html>");
+        howToPlayLabel.setFont(new Font("Arial", Font.PLAIN, 18));
+        howToPlayLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        howToPlayLabel.setBorder(BorderFactory.createEmptyBorder(20, 10, 20, 10)); 
+        startPanel.add(howToPlayLabel);
 
         // Add listeners to handle button clicks
         buttonNewGame.addActionListener(e -> switchPanel(buttonNewGame.getText()));
@@ -280,7 +301,7 @@ public class SnakegameView extends JFrame {
             this.getLeaderboard();
         } else if (text == gameHistory) {
             cardLayout.show(mainPanel, gameHistory);
-            this.getGameHistory();            
+            this.getGameHistory();
         } else
             cardLayout.show(mainPanel, start);
     }

@@ -1,17 +1,18 @@
 package org.snake.view;
 
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.util.ArrayList;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.Timer;
 
+import org.snake.model.Snake;
 import org.snake.model.SnakegameModel;
 import org.snake.util.Cell;
 
@@ -19,7 +20,7 @@ public class GameboardPanel extends JPanel {
     private SnakegameModel model;
     private Timer controlTimer;
     private Timer gameTimer;
-    private ArrayList<Cell> snake;
+    private Snake snake;
     private Cell snakeHead;
     private Cell food;
     private int cellSize;
@@ -59,7 +60,7 @@ public class GameboardPanel extends JPanel {
         graphic.fillRect(snakeHead.getX() * cellSize, snakeHead.getY() * cellSize, cellSize, cellSize);
 
         // Draw the snake body
-        for (Cell bodySegment : snake) {
+        for (Cell bodySegment : snake.getSnake()) {
             graphic.fillRect(bodySegment.getX() * cellSize, bodySegment.getY() * cellSize, cellSize, cellSize);
         }
 
@@ -68,10 +69,18 @@ public class GameboardPanel extends JPanel {
         graphic.fillRect(food.getX() * cellSize, food.getY() * cellSize, cellSize, cellSize);
 
         // Display game over
-        if (model.isTimeAllocationUsed()) {
-            graphic.drawString("Game Over. You have used your time allocation for today!", 5, 10);
-        } else if (model.isGameOver()) {
-            graphic.drawString("Game Over", 5, 10);
+        if (model.isGameOver()) {
+            int y = this.getHeight() / 2;
+            Font font = new Font("Arial", Font.PLAIN, 24);
+            graphic.setFont(font);
+            if (model.isTimeAllocationUsed()) {
+                int x = (this.getWidth() - 600) / 2;
+                graphic.drawString("Game Over. You have used your time allocation for today!", x, y);
+            }
+            else {
+                int x = (this.getWidth() - 100) / 2;
+                graphic.drawString("Game Over", x, y);
+            }
         }
     }
 
@@ -112,7 +121,7 @@ public class GameboardPanel extends JPanel {
 
         // Place the snake head randomly on the game board
         snake = model.getSnake();
-        snakeHead = snake.get(0);
+        snakeHead = snake.getSnakeHead();
         System.out.println("Snake head positioned at x: " + snakeHead.getX());
 
         // Place a food item randomly on the game board
@@ -192,9 +201,9 @@ public class GameboardPanel extends JPanel {
             }
 
             // Move the snake body
-            for (int i = snake.size() - 1; i > 0; i--) {
-                Cell bodySegment = snake.get(i);
-                Cell prevBodySegment = snake.get(i - 1);
+            for (int i = snake.getSnakeLength() - 1; i > 0; i--) {
+                Cell bodySegment = snake.getBodySegment(i);
+                Cell prevBodySegment = snake.getBodySegment(i - 1);
                 bodySegment.setX(prevBodySegment.getX());
                 bodySegment.setY(prevBodySegment.getY());
             }
@@ -213,6 +222,7 @@ public class GameboardPanel extends JPanel {
     // But only if it wasn't previously 'R', otherwise the snake will double back on
     // itself, which isn't allowed
     // The same for the other arrow keys
+    // Allow the player to pause the game by pressing 'p'
     private class MyKeyAdapter extends KeyAdapter {
         @Override
         public void keyPressed(KeyEvent e) {
@@ -236,6 +246,12 @@ public class GameboardPanel extends JPanel {
                     if (model.getDirection() != 'U') {
                         model.setDirection('D');
                     }
+                    break;
+                case KeyEvent.VK_P:
+                    if (controlTimer != null && controlTimer.isRunning()) 
+                        controlTimer.stop();
+                    else
+                        controlTimer.restart();
                     break;
             }
         }

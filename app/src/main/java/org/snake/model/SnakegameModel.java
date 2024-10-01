@@ -3,7 +3,6 @@ package org.snake.model;
 import java.awt.Color;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.Random;
 
 import org.json.JSONArray;
@@ -14,6 +13,8 @@ import org.snake.util.ConfigReader;
 
 public class SnakegameModel {
     private static String configFilename = "snakegame.config";
+    private static final Random randomNumberGenerator = new Random();
+
     private String gameTitle;
     private int boardSize;
     private int numberOfColumns;
@@ -35,11 +36,8 @@ public class SnakegameModel {
     private int topSomething;
     private int currentSessionTime;
     private DataHandler dataHandler;
-
-    // The snake, with the head in the first position
-    private ArrayList<Cell> snake;
+    private Snake snake;
     private Cell food;
-    private static final Random randomNumberGenerator = new Random();
 
     public SnakegameModel() {
         readConfig();
@@ -102,10 +100,6 @@ public class SnakegameModel {
         return timerInterval;
     }
 
-    public int getSnakeLength() {
-        return snakeLength;
-    }
-
     public int getCellSize() {
         return cellSize;
     }
@@ -122,7 +116,7 @@ public class SnakegameModel {
         return food;
     }
 
-    public ArrayList<Cell> getSnake() {
+    public Snake getSnake() {
         return snake;
     }
 
@@ -179,7 +173,12 @@ public class SnakegameModel {
     }
 
     public JSONArray getLeaderboard() {
-        JSONArray leaderboard = new JSONArray(dataHandler.readLeaderboard(topSomething));
+        String sLeaderboard = dataHandler.readLeaderboard(topSomething);
+        JSONArray leaderboard;
+        if (sLeaderboard == null)
+            leaderboard = new JSONArray();
+        else
+            leaderboard = new JSONArray(sLeaderboard);
         return leaderboard;
     }
 
@@ -208,11 +207,10 @@ public class SnakegameModel {
     }
 
     public boolean isCollisionFood() {
-        Cell snakeHead = snake.get(0);
-        if (this.isCollision(snakeHead, food)) {
+        if (this.isCollision(snake.getSnakeHead(), food)) {
             // Grow the snake if there is a collision with a food item
             Cell bodySegment = new Cell(food.getX(), food.getY());
-            snake.add(bodySegment);
+            snake.addBodySegment(bodySegment);
             currentScore++;
             return true;
         } else {
@@ -222,7 +220,7 @@ public class SnakegameModel {
 
     public boolean isCollisionWall() {
         // Check for collision betwee the snake head and the game wall
-        Cell snakeHead = snake.get(0);
+        Cell snakeHead = snake.getSnakeHead();
         if (snakeHead.getX() == wallTop || snakeHead.getX() == wallBottom || snakeHead.getY() == wallLeft
                 || snakeHead.getY() == wallRight) {
             gameOver = true;
@@ -234,10 +232,10 @@ public class SnakegameModel {
 
     public boolean isCollisionBody() {
         // Check for collision betwee the snake head and body
-        Cell snakeHead = snake.get(0);
-        for (int i = snake.size() - 1; i > 1; i--) {
-            Cell bodySegment = snake.get(i);
-            if (this.isCollision(snakeHead, bodySegment)) {
+
+        for (int i = snake.getSnakeLength() - 1; i > 1; i--) {
+            Cell bodySegment = snake.getBodySegment(i);
+            if (this.isCollision(snake.getSnakeHead(), bodySegment)) {
                 gameOver = true;
             }
         }
@@ -247,29 +245,29 @@ public class SnakegameModel {
     /**
      * Initialise the snake with the snake head at position 0 in the ArrayList
      * 
-     * @return an ArrayList of Cells representing the snake body with the snake head
-     *         in position 0
      */
-    public ArrayList<Cell> initialiseSnake() {
+    public void initialiseSnake() {
         int x = randomNumberGenerator.nextInt((boardSize / cellSize) - 2) + 1;
         int y = randomNumberGenerator.nextInt((boardSize / cellSize) - 2) + 1;
-        snake = new ArrayList<Cell>();
-        Cell snakeHead = new Cell(x, y);
-        snake.add(snakeHead);
-        for (int i = 0; i < snakeLength; i++) {
-            Cell bodySegment = new Cell(x, y + i);
-            snake.add(bodySegment);
-            System.out.println("initialiseSnake snake segment: " + bodySegment.getX() + ", " + bodySegment.getY());
-        }
 
-        System.out.println("Snake length in initialiseSnake is: " + snake.size());
+        snake = new Snake(x, y);
+        snake.createSnakeBody(this.snakeLength);
+        System.out.println("Snake length in initialiseSnake is: " + snake.getSnakeLength());
         // Set the initial direction for the snake
         this.direction = 'U';
         currentScore = 0;
-        return snake;
     }
 
+    /**
+     * Places food at a random location on the game board.
+     * The food is placed within the valid board boundaries, ensuring it does not
+     * appear on the outermost cells.
+     * 
+     * @return Cell representing the newly placed food location.
+     */
     public Cell placeFood() {
+        // Generate random coordinates for the food, ensuring it's within the board
+        // boundaries, avoiding the first and last rows/columns (hence the +1 and -2).
         int x = randomNumberGenerator.nextInt((boardSize / cellSize) - 2) + 1;
         int y = randomNumberGenerator.nextInt((boardSize / cellSize) - 2) + 1;
         food = new Cell(x, y);
@@ -290,8 +288,7 @@ public class SnakegameModel {
         if (this.currentSessionTime > this.gameTimeAllowed) {
             this.dailyTimeUsed = true;
             this.gameOver = true;
-        } 
-        else {
+        } else {
             this.dailyTimeUsed = false;
         }
         return this.gameOver;

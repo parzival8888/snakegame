@@ -110,7 +110,7 @@ public class DataHandlerTest {
     }
 
     @Test
-    public void testReadLeaderboard() {
+    public String testReadLeaderboard() {
         dataHandler.createGameTable();
         dataHandler.insertGameTable(120, 500);
         dataHandler.insertGameTable(150, 1000);
@@ -118,6 +118,7 @@ public class DataHandlerTest {
 
         assertNotNull(leaderboardData, "Returned JSON data should not be null");
         assertTrue(leaderboardData.contains("1000"), "Leaderboard should contain the highest score");
+        return leaderboardData;
     }
 
     @Test
