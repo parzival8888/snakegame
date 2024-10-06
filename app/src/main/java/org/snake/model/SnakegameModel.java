@@ -16,8 +16,9 @@ import org.snake.util.ConfigReader;
  */
 public class SnakegameModel {
 
-    private static String configFilename = "snakegame.config"; // Configuration file name
-    private static final Random randomNumberGenerator = new Random(); // Random number generator for food placement
+    private static final String CONFIG_FILENAME = "snakegame.config"; // Configuration file name
+    private static final Random RANDOM = new Random(); // Random number generator for food placement
+    private static final int OFFSET = 2;
 
     private String gameTitle; 
     private int boardSize; 
@@ -42,14 +43,13 @@ public class SnakegameModel {
     private DataHandler dataHandler; 
     private Snake snake; 
     private Cell food; 
+
     /**
      * Default constructor that initializes a new SnakegameModel instance,
      * reading configuration settings and preparing for a new game.
      */
     public SnakegameModel() {
-        readConfig(); 
-        this.dataHandler = new DataHandler(); 
-        this.gameOver = false; 
+        initializeGameModel(new DataHandler());
     }
 
     /**
@@ -59,17 +59,27 @@ public class SnakegameModel {
      *                    operations.
      */
     public SnakegameModel(DataHandler dataHandler) {
-        readConfig();
-        this.dataHandler = dataHandler;
-        this.gameOver = false;
+        initializeGameModel(dataHandler);
     }
 
+    /**
+     * Initialises the model using the appropriate data handler.
+     *
+     * @param dataHandler The DataHandler instance to be used for database
+     *                    operations.
+     */
+    private void initializeGameModel(DataHandler dataHandler) {
+        this.dataHandler = dataHandler;
+        this.gameOver = false;
+        readConfig();
+    }
+    
     /**
      * Reads configuration settings from a specified config file.
      * Initializes various properties such as title, size, colors, and snake length.
      */
     private void readConfig() {
-        ConfigReader.readConfig(configFilename);
+        ConfigReader.readConfig(CONFIG_FILENAME);
         this.gameTitle = ConfigReader.getProperty("gametitle");
         this.boardSize = Integer.parseInt(ConfigReader.getProperty("boardsize"));
         this.numberOfColumns = Integer.parseInt(ConfigReader.getProperty("numberofcolumns"));
@@ -81,10 +91,6 @@ public class SnakegameModel {
         this.direction = ConfigReader.getProperty("startdirection").charAt(0);
         this.gameTimeAllowed = Integer.parseInt(ConfigReader.getProperty("gametimeallowed"));
         this.topSomething = Integer.parseInt(ConfigReader.getProperty("topsomething"));
-
-        System.out.println("game title is: " + this.gameTitle);
-        System.out.println("board size is: " + this.boardSize);
-        System.out.println("time interval is: " + this.timerInterval);
 
         // Adjust board size to ensure it's divisible by number of columns.
         this.boardSize = this.numberOfColumns * this.cellSize;
@@ -230,7 +236,7 @@ public class SnakegameModel {
      *
      * @return A boolean indicating whether a new game is being started or not.
      */
-    public boolean getNewGame() {
+    public boolean isNewGame    () {
         return newGame;
     }
 
@@ -395,15 +401,11 @@ public class SnakegameModel {
      * Sets initial direction and resets score.
      */
     public void initialiseSnake() {
-        int x = randomNumberGenerator.nextInt((boardSize / cellSize) - 2) + 1;
-        int y = randomNumberGenerator.nextInt((boardSize / cellSize) - 2) + 1;
+        int x = RANDOM.nextInt((boardSize / cellSize) - 2) + 1;
+        int y = RANDOM.nextInt((boardSize / cellSize) - 2) + 1;
 
         snake = new Snake(x, y, this.snakeLength);
-
-        System.out.println("Snake length in initialiseSnake is: " + snake.getSnakeLength());
-
         this.direction = 'U';
-
         currentScore = 0;
     }
 
@@ -414,11 +416,10 @@ public class SnakegameModel {
      * @return Cell representing newly placed food location.
      */
     public Cell placeFood() {
-        int x = randomNumberGenerator.nextInt((boardSize / cellSize) - 2) + 1;
-        int y = randomNumberGenerator.nextInt((boardSize / cellSize) - 2) + 1;
+        int x = RANDOM.nextInt((boardSize / cellSize) - OFFSET) + 1;
+        int y = RANDOM.nextInt((boardSize / cellSize) - OFFSET) + 1;
 
         food = new Cell(x, y);
-
         return food;
     }
 
@@ -430,9 +431,7 @@ public class SnakegameModel {
      */
     public void storeGameTime(int gameTime) {
         this.currentSessionTime += gameTime;
-
         dataHandler.insertSessionTable(currentSessionTime);
-
         dataHandler.insertGameTable(gameTime, currentScore);
     }
 
@@ -454,14 +453,10 @@ public boolean startNewGame() {
       if (this.currentSessionTime > this.gameTimeAllowed) {     
           this.dailyTimeUsed = true;     
           this.gameOver = true;     
-          
           return true;     
-          
        } else {     
            this.dailyTimeUsed = false;
-
            return false;
-
        }
     }
 }

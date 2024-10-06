@@ -23,7 +23,7 @@ public class DataHandler {
      * SQL statement to create the game history table.
      * Stores details of each game played.
      */
-    private static String createGameTableSQL = "CREATE TABLE IF NOT EXISTS game_history ("
+    private static final String CREATE_GAME_TABLE_SQL = "CREATE TABLE IF NOT EXISTS game_history ("
             + "rowid INTEGER PRIMARY KEY AUTOINCREMENT, "
             + "timestamp TEXT NOT NULL, "
             + "duration INTEGER NOT NULL, "
@@ -31,25 +31,25 @@ public class DataHandler {
             + ");";
 
     // SQL statements for inserting and reading game data
-    private static String insertGameSQL = "INSERT INTO game_history(timestamp, duration, score) VALUES(?, ?, ?)";
-    private static String readGameSQL = "SELECT * FROM game_history";
-    private static String readLeaderboardSQL = "SELECT * FROM game_history ORDER BY score DESC LIMIT ?";
-    private static String readTotalDurationSQL = "SELECT strftime('%Y-%m-%d', timestamp) AS date, sum(duration) AS total_duration FROM game_history GROUP BY strftime('%Y-%m-%d', timestamp);";
-    private String rowIdSql = "SELECT last_insert_rowid()";
+    private static final String INSERT_GAME_SQL = "INSERT INTO game_history(timestamp, duration, score) VALUES(?, ?, ?)";
+    private static final String READ_GAME_SQL = "SELECT * FROM game_history";
+    private static final String READ_LEADERBOARD_SQL = "SELECT * FROM game_history ORDER BY score DESC LIMIT ?";
+    private static final String READ_TOTAL_DURATION_SQL = "SELECT strftime('%Y-%m-%d', timestamp) AS date, sum(duration) AS total_duration FROM game_history GROUP BY strftime('%Y-%m-%d', timestamp);";
+    private static final String ROW_ID_SQL = "SELECT last_insert_rowid()";
 
     /**
      * SQL statement to create the session table.
      * Stores the total duration of all games played during a session.
      */
-    private static String createSessionTableSQL = "CREATE TABLE IF NOT EXISTS game_session ("
+    private static final String CREATE_SESSION_TABLE_SQL = "CREATE TABLE IF NOT EXISTS game_session ("
             + "date TEXT PRIMARY KEY, "
             + "duration INTEGER NOT NULL "
             + ");";
 
     // SQL statements for inserting and reading session data
-    private static String insertSessionSQL = "INSERT OR REPLACE INTO game_session(date, duration) VALUES(?, ?)";
-    private static String readSessionSQL = "SELECT * FROM game_session";
-    private static String readSessionByDateSQL = "SELECT * FROM game_session WHERE date = ?";
+    private static final String INSERT_SESSION_SQL = "INSERT OR REPLACE INTO game_session(date, duration) VALUES(?, ?)";
+    private static final String READ_SESSION_SQL = "SELECT * FROM game_session";
+    private static final String READ_SESSION_BY_DATE_SQL = "SELECT * FROM game_session WHERE date = ?";
 
     /**
      * Initializes the DataHandler by creating necessary tables in the database.
@@ -69,7 +69,7 @@ public class DataHandler {
         try {
             conn = DriverManager.getConnection(connectionURL);
             Statement stmtRead = conn.createStatement();
-            ResultSet rs = stmtRead.executeQuery(readGameSQL);
+            ResultSet rs = stmtRead.executeQuery(READ_GAME_SQL);
             while (rs.next()) {
                 JSONObject jsonObject = new JSONObject();
                 jsonObject.put("timestamp", rs.getString("timestamp"));
@@ -95,7 +95,7 @@ public class DataHandler {
         JSONArray jsonArray = new JSONArray();
         try {
             conn = DriverManager.getConnection(connectionURL);
-            PreparedStatement pstmtSelect = conn.prepareStatement(readLeaderboardSQL);
+            PreparedStatement pstmtSelect = conn.prepareStatement(READ_LEADERBOARD_SQL);
             pstmtSelect.setInt(1, topSomething);
             ResultSet rs = pstmtSelect.executeQuery();
             while (rs.next()) {
@@ -123,7 +123,7 @@ public class DataHandler {
         try {
             conn = DriverManager.getConnection(connectionURL);
             Statement stmtSelect = conn.createStatement();
-            ResultSet rs = stmtSelect.executeQuery(readTotalDurationSQL);
+            ResultSet rs = stmtSelect.executeQuery(READ_TOTAL_DURATION_SQL);
             while (rs.next()) {
                 JSONObject jsonObject = new JSONObject();
                 jsonObject.put("date", rs.getString("date"));
@@ -144,7 +144,7 @@ public class DataHandler {
     public void createGameTable() {
         try {
             conn = DriverManager.getConnection(connectionURL);
-            PreparedStatement pstmtCreate = conn.prepareStatement(createGameTableSQL);
+            PreparedStatement pstmtCreate = conn.prepareStatement(CREATE_GAME_TABLE_SQL);
             pstmtCreate.executeUpdate();
             pstmtCreate.close();
             conn.close();
@@ -164,8 +164,8 @@ public class DataHandler {
         long lastInsertedRowId = 0;
         try {
             conn = DriverManager.getConnection(connectionURL);
-            PreparedStatement pstmtInsert = conn.prepareStatement(insertGameSQL);
-            PreparedStatement rowIdStmt = conn.prepareStatement(rowIdSql);
+            PreparedStatement pstmtInsert = conn.prepareStatement(INSERT_GAME_SQL);
+            PreparedStatement rowIdStmt = conn.prepareStatement(ROW_ID_SQL);
             
             LocalDateTime currentTime = LocalDateTime.now(); // Get current time
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"); // Define format
@@ -200,7 +200,7 @@ public class DataHandler {
         try {
             conn = DriverManager.getConnection(connectionURL);
             Statement stmtRead = conn.createStatement();
-            ResultSet rs = stmtRead.executeQuery(readSessionSQL);
+            ResultSet rs = stmtRead.executeQuery(READ_SESSION_SQL);
             
             while (rs.next()) {
                 JSONObject jsonObject = new JSONObject();
@@ -227,7 +227,7 @@ public class DataHandler {
         JSONObject jsonObject = new JSONObject();
         try {
            conn = DriverManager.getConnection(connectionURL);
-           PreparedStatement pstmtRead = conn.prepareStatement(readSessionByDateSQL);
+           PreparedStatement pstmtRead = conn.prepareStatement(READ_SESSION_BY_DATE_SQL);
            pstmtRead.setString(1, date);
            ResultSet rs = pstmtRead.executeQuery();
 
@@ -250,7 +250,7 @@ public class DataHandler {
    public void createSessionTable() {
        try {
            conn = DriverManager.getConnection(connectionURL);
-           PreparedStatement pstmtCreate = conn.prepareStatement(createSessionTableSQL);
+           PreparedStatement pstmtCreate = conn.prepareStatement(CREATE_SESSION_TABLE_SQL);
            pstmtCreate.executeUpdate(); // Execute creation
            pstmtCreate.close(); 
            conn.close(); 
@@ -267,7 +267,7 @@ public class DataHandler {
    public void insertSessionTable(int gameDuration) { 
        try { 
            conn = DriverManager.getConnection(connectionURL); 
-           PreparedStatement pstmtInsert = conn.prepareStatement(insertSessionSQL); 
+           PreparedStatement pstmtInsert = conn.prepareStatement(INSERT_SESSION_SQL); 
 
            LocalDateTime currentTime = LocalDateTime.now(); 
            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd"); 

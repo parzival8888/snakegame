@@ -16,32 +16,33 @@ import org.snake.util.Cell;
 
 /**
  * GameboardPanel is a JPanel that represents the game board for the Snake game.
- * It handles rendering the game elements such as the snake, food, and game state,
+ * It handles rendering the game elements such as the snake, food, and game
+ * state,
  * as well as user input for controlling the snake's movement.
  */
 public class GameboardPanel extends JPanel {
 
     private SnakegameModel model;
-    private Timer controlTimer; 
-    private Timer gameTimer; 
+    private Timer controlTimer;
+    private Timer gameTimer;
     private Snake snake;
-    private Cell snakeHead; 
+    private Cell snakeHead;
     private Cell food;
-    private int cellSize; 
-    private int timerInterval; 
-    private int gameTime; 
+    private int cellSize;
+    private int timerInterval;
+    private int gameTime;
     private char direction;
-    private JLabel scoreLabel; 
-    private JLabel gameTimerLabel; 
-    private JLabel sessionTimerLabel; 
-    private static int sessionTimerInterval = 1000; 
+    private JLabel scoreLabel;
+    private JLabel gameTimerLabel;
+    private JLabel sessionTimerLabel;
+    private static int sessionTimerInterval = 1000;
 
     /**
      * Constructs a GameboardPanel with the specified model and labels.
      *
-     * @param model The SnakegameModel containing game logic.
-     * @param scoreLabel The JLabel to display the score.
-     * @param gameTimerLabel The JLabel to display the game time.
+     * @param model             The SnakegameModel containing game logic.
+     * @param scoreLabel        The JLabel to display the score.
+     * @param gameTimerLabel    The JLabel to display the game time.
      * @param sessionTimerLabel The JLabel to display session time.
      */
     public GameboardPanel(SnakegameModel model, JLabel scoreLabel, JLabel gameTimerLabel, JLabel sessionTimerLabel) {
@@ -50,11 +51,12 @@ public class GameboardPanel extends JPanel {
         this.gameTimerLabel = gameTimerLabel;
         this.sessionTimerLabel = sessionTimerLabel;
         this.timerInterval = model.getTimerInterval();
-        this.addKeyListener(new MyKeyAdapter()); 
+        this.addKeyListener(new MyKeyAdapter());
     }
 
     /**
-     * Paints the component, rendering the game board, snake, food, and game over message if applicable.
+     * Paints the component, rendering the game board, snake, food, and game over
+     * message if applicable.
      *
      * @param graphic The Graphics context used for painting.
      */
@@ -64,7 +66,7 @@ public class GameboardPanel extends JPanel {
         setFocusable(true); // Make sure the panel can receive key events
         requestFocusInWindow(); // Request focus for key events
 
-        if (model.getNewGame()) {
+        if (model.isNewGame()) {
             model.setNewGame(false);
             model.startNewGame();
             prepareBoard(graphic);
@@ -138,20 +140,21 @@ public class GameboardPanel extends JPanel {
     }
 
     /**
-     * Starts a new game by initializing scores and placing the snake and food on the board.
+     * Starts a new game by initializing scores and placing the snake and food on
+     * the board.
      */
     public void startGame() {
         scoreLabel.setText("Score: " + model.getCurrentScore());
-        
+
         // Positioning snake head randomly on the board
         snake = model.getSnake();
         snakeHead = snake.getSnakeHead();
-        
+
         System.out.println("Snake head positioned at x: " + snakeHead.getX());
-        
+
         // Positioning food randomly on the board
         food = model.getFoodLocation();
-        
+
         System.out.println("Food positioned at x: " + food.getX());
 
         if (controlTimer != null && !controlTimer.isRunning()) {
@@ -160,29 +163,29 @@ public class GameboardPanel extends JPanel {
             controlTimer = new Timer(timerInterval, new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    moveSnake(); 
+                    moveSnake();
                     setFocusable(true);
-                    requestFocusInWindow(); 
-                    repaint(); 
+                    requestFocusInWindow();
+                    repaint();
 
                     if (model.isGameOver()) {
-                        handleGameOver(); 
+                        handleGameOver();
                     }
                 }
             });
             controlTimer.start(); // Start control timer
 
-            sessionTimerLabel.setText("Session time: " + model.getCurrentSessionTime()); 
+            sessionTimerLabel.setText("Session time: " + model.getCurrentSessionTime());
 
-            if (gameTimer == null) { 
+            if (gameTimer == null) {
                 gameTimer = new Timer(sessionTimerInterval, new ActionListener() {
                     @Override
                     public void actionPerformed(ActionEvent e) {
-                        gameTime++; 
-                        gameTimerLabel.setText("Game time: " + gameTime); 
+                        gameTime++;
+                        gameTimerLabel.setText("Game time: " + gameTime);
                     }
                 });
-                gameTimer.start(); 
+                gameTimer.start();
             }
         }
     }
@@ -191,93 +194,105 @@ public class GameboardPanel extends JPanel {
      * Handles actions when the game is over.
      */
     private void handleGameOver() {
-        controlTimer.stop(); 
-        gameTimer.stop(); 
-        gameTimer = null; 
-       
-       model.storeGameTime(gameTime); 
-       sessionTimerLabel.setText("Session time: " + model.getCurrentSessionTime()); 
-       gameTime = 0; 
+        controlTimer.stop();
+        if (!(this.gameTimer == null)) {
+            gameTimer.stop();
+            gameTimer = null;
+        }
+
+        model.storeGameTime(gameTime);
+        sessionTimerLabel.setText("Session time: " + model.getCurrentSessionTime());
+        gameTime = 0;
     }
 
     /**
-     * Moves the snake in its current direction and checks for collisions with food or walls.
+     * Moves the snake in its current direction and checks for collisions with food
+     * or walls.
      */
     private void moveSnake() {
-       if (!(snakeHead == null)) { 
-           direction = model.getDirection(); 
+        if (!(snakeHead == null)) {
 
-           switch (direction) { 
-               case 'U':
-                   snakeHead.setY(snakeHead.getY() - 1);
-                   break;
-               case 'D':
-                   snakeHead.setY(snakeHead.getY() + 1);
-                   break;
-               case 'L':
-                   snakeHead.setX(snakeHead.getX() - 1);
-                   break;
-               case 'R':
-                   snakeHead.setX(snakeHead.getX() + 1);
-                   break;
-           }
+            direction = model.getDirection();
+            Cell storeSnakeHead = new Cell(snakeHead.getX(), snakeHead.getY());
 
-           if (model.isCollisionFood()) { 
-               scoreLabel.setText("Score: " + model.getCurrentScore()); 
-               food = model.placeFood(); 
+            switch (direction) {
+                case 'U':
+                    snakeHead.setY(snakeHead.getY() - 1);
+                    break;
+                case 'D':
+                    snakeHead.setY(snakeHead.getY() + 1);
+                    break;
+                case 'L':
+                    snakeHead.setX(snakeHead.getX() - 1);
+                    break;
+                case 'R':
+                    snakeHead.setX(snakeHead.getX() + 1);
+                    break;
+            }
 
-               for (int i = snake.getSnakeLength() - 1; i > 0; i--) { 
-                   Cell bodySegment = snake.getBodySegment(i); 
-                   Cell prevBodySegment = snake.getBodySegment(i - 1); 
-                   bodySegment.setX(prevBodySegment.getX()); 
-                   bodySegment.setY(prevBodySegment.getY()); 
-               }
-           }
+            // Check for collision between snake head and food
+            if (model.isCollisionFood()) {
+                scoreLabel.setText("Score: " + model.getCurrentScore());
+                food = model.placeFood();
+            }
 
-           model.isCollisionWall(); 
-           model.isCollisionBody(); 
-       }
-   }
+            // Move the snake body
+            for (int i = snake.getSnakeLength() - 1; i > 0; i--) {
+                Cell bodySegment = snake.getBodySegment(i);
+                Cell prevBodySegment = snake.getBodySegment(i - 1);
+                // Move the first body segment to the previous location of the head
+                if (i == 1) {
+                    prevBodySegment = storeSnakeHead;
+                }
+                bodySegment.setX(prevBodySegment.getX());
+                bodySegment.setY(prevBodySegment.getY());
+            }
 
-   /**
-    * Key adapter class to handle user input from keyboard events.
-    */
-   private class MyKeyAdapter extends KeyAdapter {
-       @Override
-       public void keyPressed(KeyEvent e) { 
-           switch (e.getKeyCode()) { 
-               case KeyEvent.VK_LEFT:
-                   if (model.getDirection() != 'R') { 
-                       model.setDirection('L'); 
-                   }
-                   break;
+            // Check for collisions with the game walls and the snake body
+            model.isCollisionWall();
+            model.isCollisionBody();
+        }
+    }
 
-               case KeyEvent.VK_RIGHT:
-                   if (model.getDirection() != 'L') { 
-                       model.setDirection('R'); 
-                   }
-                   break;
+    /**
+     * Key adapter class to handle user input from keyboard events.
+     */
+    private class MyKeyAdapter extends KeyAdapter {
+        @Override
+        public void keyPressed(KeyEvent e) {
+            switch (e.getKeyCode()) {
+                case KeyEvent.VK_LEFT:
+                    if (model.getDirection() != 'R') {
+                        model.setDirection('L');
+                    }
+                    break;
 
-               case KeyEvent.VK_UP:
-                   if (model.getDirection() != 'D') { 
-                       model.setDirection('U'); 
-                   }
-                   break;
+                case KeyEvent.VK_RIGHT:
+                    if (model.getDirection() != 'L') {
+                        model.setDirection('R');
+                    }
+                    break;
 
-               case KeyEvent.VK_DOWN:
-                   if (model.getDirection() != 'U') { 
-                       model.setDirection('D'); 
-                   }
-                   break;
+                case KeyEvent.VK_UP:
+                    if (model.getDirection() != 'D') {
+                        model.setDirection('U');
+                    }
+                    break;
 
-               case KeyEvent.VK_P:
-                   if (controlTimer != null && controlTimer.isRunning()) {
-                       controlTimer.stop(); // Pause the game if running
-                   } else {
-                       controlTimer.restart(); // Restart timer if paused or stopped
-                   }
-                   break;
-           }
-       }
-   }
+                case KeyEvent.VK_DOWN:
+                    if (model.getDirection() != 'U') {
+                        model.setDirection('D');
+                    }
+                    break;
+
+                case KeyEvent.VK_P:
+                    if (controlTimer != null && controlTimer.isRunning()) {
+                        controlTimer.stop(); // Pause the game if running
+                    } else {
+                        controlTimer.restart(); // Restart timer if paused or stopped
+                    }
+                    break;
+            }
+        }
+    }
 }
