@@ -7,53 +7,71 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.Timer;
-
 import org.snake.model.Snake;
 import org.snake.model.SnakegameModel;
 import org.snake.util.Cell;
 
+/**
+ * GameboardPanel is a JPanel that represents the game board for the Snake game.
+ * It handles rendering the game elements such as the snake, food, and game state,
+ * as well as user input for controlling the snake's movement.
+ */
 public class GameboardPanel extends JPanel {
+
     private SnakegameModel model;
-    private Timer controlTimer;
-    private Timer gameTimer;
+    private Timer controlTimer; 
+    private Timer gameTimer; 
     private Snake snake;
-    private Cell snakeHead;
+    private Cell snakeHead; 
     private Cell food;
-    private int cellSize;
-    private int timerInterval;
-    private int gameTime;
+    private int cellSize; 
+    private int timerInterval; 
+    private int gameTime; 
     private char direction;
-    private JLabel scoreLabel;
-    private JLabel gameTimerLabel;
-    private JLabel sessionTimerLabel;
+    private JLabel scoreLabel; 
+    private JLabel gameTimerLabel; 
+    private JLabel sessionTimerLabel; 
+    private static int sessionTimerInterval = 1000; 
 
-    private static int sessionTimerInterval = 1000; // Will always be 1 second
-
+    /**
+     * Constructs a GameboardPanel with the specified model and labels.
+     *
+     * @param model The SnakegameModel containing game logic.
+     * @param scoreLabel The JLabel to display the score.
+     * @param gameTimerLabel The JLabel to display the game time.
+     * @param sessionTimerLabel The JLabel to display session time.
+     */
     public GameboardPanel(SnakegameModel model, JLabel scoreLabel, JLabel gameTimerLabel, JLabel sessionTimerLabel) {
         this.model = model;
         this.scoreLabel = scoreLabel;
         this.gameTimerLabel = gameTimerLabel;
         this.sessionTimerLabel = sessionTimerLabel;
         this.timerInterval = model.getTimerInterval();
-        this.addKeyListener(new MyKeyAdapter()); // Key listener to handle direction changes via arrow keys
+        this.addKeyListener(new MyKeyAdapter()); 
     }
 
+    /**
+     * Paints the component, rendering the game board, snake, food, and game over message if applicable.
+     *
+     * @param graphic The Graphics context used for painting.
+     */
     @Override
     protected void paintComponent(Graphics graphic) {
         super.paintComponent(graphic);
         setFocusable(true); // Make sure the panel can receive key events
         requestFocusInWindow(); // Request focus for key events
+
         if (model.getNewGame()) {
             model.setNewGame(false);
             model.startNewGame();
             prepareBoard(graphic);
             startGame();
         }
-        prepareBoard(graphic);
+
+        prepareBoard(graphic); // Prepare and draw board
 
         // Draw the snake head
         graphic.setColor(Color.GREEN);
@@ -68,28 +86,34 @@ public class GameboardPanel extends JPanel {
         graphic.setColor(Color.RED);
         graphic.fillRect(food.getX() * cellSize, food.getY() * cellSize, cellSize, cellSize);
 
-        // Display game over
+        // Display game over message if applicable
         if (model.isGameOver()) {
             int y = this.getHeight() / 2;
             Font font = new Font("Arial", Font.PLAIN, 24);
             graphic.setFont(font);
+            int x;
+
             if (model.isTimeAllocationUsed()) {
-                int x = (this.getWidth() - 600) / 2;
+                x = (this.getWidth() - 600) / 2;
                 graphic.drawString("Game Over. You have used your time allocation for today!", x, y);
-            }
-            else {
-                int x = (this.getWidth() - 100) / 2;
+            } else {
+                x = (this.getWidth() - 100) / 2;
                 graphic.drawString("Game Over", x, y);
             }
         }
     }
 
+    /**
+     * Prepares the game board by drawing it and setting up grid lines.
+     *
+     * @param graphic The Graphics context used for drawing.
+     */
     private void prepareBoard(Graphics graphic) {
         int boardSize = model.getBoardSize();
         int numColumns = model.getNumberOfColumns();
         cellSize = model.getCellSize();
 
-        // Draw the game board
+        // Draw the game board background
         graphic.setColor(model.getBoardColour());
         graphic.fillRect(0, 0, boardSize, boardSize);
 
@@ -97,163 +121,163 @@ public class GameboardPanel extends JPanel {
         graphic.setColor(model.getBoardGridColour());
         for (int i = 0; i <= numColumns; i++) {
             int x = i * cellSize;
-            graphic.drawLine(x, 0, x, boardSize);
-        }
+            graphic.drawLine(x, 0, x, boardSize); // Vertical lines
 
-        // Draw horizontal lines
-        for (int i = 0; i <= numColumns; i++) {
             int y = i * cellSize;
-            graphic.drawLine(0, y, boardSize, y);
+            graphic.drawLine(0, y, boardSize, y); // Horizontal lines
         }
 
-        // Draw the game walls
+        // Draw walls around the board
+        graphic.setColor(Color.BLACK);
         for (int i = 0; i < numColumns; i++) {
-            graphic.setColor(Color.BLACK);
-            graphic.fillRect(0, i * cellSize, cellSize, cellSize);
-            graphic.fillRect(i * cellSize, 0, cellSize, cellSize);
-            graphic.fillRect((numColumns - 1) * cellSize, i * cellSize, cellSize, cellSize);
-            graphic.fillRect(i * cellSize, (numColumns - 1) * cellSize, cellSize, cellSize);
+            graphic.fillRect(0, i * cellSize, cellSize, cellSize); // Left wall
+            graphic.fillRect(i * cellSize, 0, cellSize, cellSize); // Top wall
+            graphic.fillRect((numColumns - 1) * cellSize, i * cellSize, cellSize, cellSize); // Right wall
+            graphic.fillRect(i * cellSize, (numColumns - 1) * cellSize, cellSize, cellSize); // Bottom wall
         }
     }
 
+    /**
+     * Starts a new game by initializing scores and placing the snake and food on the board.
+     */
     public void startGame() {
         scoreLabel.setText("Score: " + model.getCurrentScore());
-
-        // Place the snake head randomly on the game board
+        
+        // Positioning snake head randomly on the board
         snake = model.getSnake();
         snakeHead = snake.getSnakeHead();
+        
         System.out.println("Snake head positioned at x: " + snakeHead.getX());
-
-        // Place a food item randomly on the game board
+        
+        // Positioning food randomly on the board
         food = model.getFoodLocation();
+        
         System.out.println("Food positioned at x: " + food.getX());
 
-        // Create a timer that moves the snake. The timer delay is configurable
-        // Handle game restart. If the timer has already been created, restart it
         if (controlTimer != null && !controlTimer.isRunning()) {
-            controlTimer.restart();
+            controlTimer.restart(); // Restart timer if already created and not running
         } else if (controlTimer == null) {
             controlTimer = new Timer(timerInterval, new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    moveSnake();
-                    setFocusable(true); // Make sure the panel can receive key events
-                    requestFocusInWindow(); // Request focus for key events
-                    repaint(); // Request a repaint
+                    moveSnake(); 
+                    setFocusable(true);
+                    requestFocusInWindow(); 
+                    repaint(); 
+
                     if (model.isGameOver()) {
-                        handleGameOver();
+                        handleGameOver(); 
                     }
                 }
             });
-            controlTimer.start(); // Start the timer
-        }
-        // Display the total game play time for the current day
-        sessionTimerLabel.setText("Session time: " + model.getCurrentSessionTime());
+            controlTimer.start(); // Start control timer
 
-        // Create a timer that tracks time played for each game
-        if (gameTimer == null) {
-            gameTimer = new Timer(sessionTimerInterval, new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    // Update the label with the elapsed time
-                    gameTime++;
-                    gameTimerLabel.setText("Game time: " + gameTime);
-                }
-            });
-            gameTimer.start(); // Start the timer
+            sessionTimerLabel.setText("Session time: " + model.getCurrentSessionTime()); 
+
+            if (gameTimer == null) { 
+                gameTimer = new Timer(sessionTimerInterval, new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        gameTime++; 
+                        gameTimerLabel.setText("Game time: " + gameTime); 
+                    }
+                });
+                gameTimer.start(); 
+            }
         }
     }
 
+    /**
+     * Handles actions when the game is over.
+     */
     private void handleGameOver() {
-        controlTimer.stop();
-        gameTimer.stop();
-        gameTimer = null;
-        model.storeGameTime(gameTime);
-        // Display the total game play time for the current day
-        sessionTimerLabel.setText("Session time: " + model.getCurrentSessionTime());
-        gameTime = 0;
+        controlTimer.stop(); 
+        gameTimer.stop(); 
+        gameTimer = null; 
+       
+       model.storeGameTime(gameTime); 
+       sessionTimerLabel.setText("Session time: " + model.getCurrentSessionTime()); 
+       gameTime = 0; 
     }
 
+    /**
+     * Moves the snake in its current direction and checks for collisions with food or walls.
+     */
     private void moveSnake() {
-        if (!(snakeHead == null)) {
-            // Move the snake head...see the comments above
+       if (!(snakeHead == null)) { 
+           direction = model.getDirection(); 
 
-            direction = model.getDirection();
-            switch (direction) {
-                case 'U':
-                    snakeHead.setY(snakeHead.getY() - 1);
-                    break;
-                case 'D':
-                    snakeHead.setY(snakeHead.getY() + 1);
-                    break;
-                case 'L':
-                    snakeHead.setX(snakeHead.getX() - 1);
-                    break;
-                case 'R':
-                    snakeHead.setX(snakeHead.getX() + 1);
-                    break;
-            }
+           switch (direction) { 
+               case 'U':
+                   snakeHead.setY(snakeHead.getY() - 1);
+                   break;
+               case 'D':
+                   snakeHead.setY(snakeHead.getY() + 1);
+                   break;
+               case 'L':
+                   snakeHead.setX(snakeHead.getX() - 1);
+                   break;
+               case 'R':
+                   snakeHead.setX(snakeHead.getX() + 1);
+                   break;
+           }
 
-            // Check for collision between snake head and food
-            if (model.isCollisionFood()) {
-                scoreLabel.setText("Score: " + model.getCurrentScore());
-                food = model.placeFood();
-            }
+           if (model.isCollisionFood()) { 
+               scoreLabel.setText("Score: " + model.getCurrentScore()); 
+               food = model.placeFood(); 
 
-            // Move the snake body
-            for (int i = snake.getSnakeLength() - 1; i > 0; i--) {
-                Cell bodySegment = snake.getBodySegment(i);
-                Cell prevBodySegment = snake.getBodySegment(i - 1);
-                bodySegment.setX(prevBodySegment.getX());
-                bodySegment.setY(prevBodySegment.getY());
-            }
+               for (int i = snake.getSnakeLength() - 1; i > 0; i--) { 
+                   Cell bodySegment = snake.getBodySegment(i); 
+                   Cell prevBodySegment = snake.getBodySegment(i - 1); 
+                   bodySegment.setX(prevBodySegment.getX()); 
+                   bodySegment.setY(prevBodySegment.getY()); 
+               }
+           }
 
-            // Check for collisions with the game walls and the snake body
-            model.isCollisionWall();
-            model.isCollisionBody();
-        }
-    }
+           model.isCollisionWall(); 
+           model.isCollisionBody(); 
+       }
+   }
 
-    // Handle pressing the arrow keys
-    // First, get the snake direction from the model
-    // Then use a 'switch' statement on the key pressed using e.getKeyCode()
-    // If the left key was pressed, KeyEvent.VK_LEFT, then set the snake direction
-    // to 'L'
-    // But only if it wasn't previously 'R', otherwise the snake will double back on
-    // itself, which isn't allowed
-    // The same for the other arrow keys
-    // Allow the player to pause the game by pressing 'p'
-    private class MyKeyAdapter extends KeyAdapter {
-        @Override
-        public void keyPressed(KeyEvent e) {
-            switch (e.getKeyCode()) {
-                case KeyEvent.VK_LEFT:
-                    if (model.getDirection() != 'R') {
-                        model.setDirection('L');
-                    }
-                    break;
-                case KeyEvent.VK_RIGHT:
-                    if (model.getDirection() != 'L') {
-                        model.setDirection('R');
-                    }
-                    break;
-                case KeyEvent.VK_UP:
-                    if (model.getDirection() != 'D') {
-                        model.setDirection('U');
-                    }
-                    break;
-                case KeyEvent.VK_DOWN:
-                    if (model.getDirection() != 'U') {
-                        model.setDirection('D');
-                    }
-                    break;
-                case KeyEvent.VK_P:
-                    if (controlTimer != null && controlTimer.isRunning()) 
-                        controlTimer.stop();
-                    else
-                        controlTimer.restart();
-                    break;
-            }
-        }
-    }
+   /**
+    * Key adapter class to handle user input from keyboard events.
+    */
+   private class MyKeyAdapter extends KeyAdapter {
+       @Override
+       public void keyPressed(KeyEvent e) { 
+           switch (e.getKeyCode()) { 
+               case KeyEvent.VK_LEFT:
+                   if (model.getDirection() != 'R') { 
+                       model.setDirection('L'); 
+                   }
+                   break;
+
+               case KeyEvent.VK_RIGHT:
+                   if (model.getDirection() != 'L') { 
+                       model.setDirection('R'); 
+                   }
+                   break;
+
+               case KeyEvent.VK_UP:
+                   if (model.getDirection() != 'D') { 
+                       model.setDirection('U'); 
+                   }
+                   break;
+
+               case KeyEvent.VK_DOWN:
+                   if (model.getDirection() != 'U') { 
+                       model.setDirection('D'); 
+                   }
+                   break;
+
+               case KeyEvent.VK_P:
+                   if (controlTimer != null && controlTimer.isRunning()) {
+                       controlTimer.stop(); // Pause the game if running
+                   } else {
+                       controlTimer.restart(); // Restart timer if paused or stopped
+                   }
+                   break;
+           }
+       }
+   }
 }

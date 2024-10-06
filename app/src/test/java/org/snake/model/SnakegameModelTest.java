@@ -1,5 +1,4 @@
 package org.snake.model;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
@@ -9,7 +8,6 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
-
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.snake.database.DataHandler;
@@ -64,7 +62,7 @@ class SnakegameModelTest {
     void testInitialiseSnake() {
         model.initialiseSnake();
         Snake snake = model.getSnake();
-        assertEquals(4, snake.getSnakeLength()); // Snake length (1 head + 3 body)
+        assertEquals(3, snake.getSnakeLength()); // Snake length (1 head + 2 body)
         assertNotNull(snake.getSnakeHead()); // Snake head is present
     }
 
