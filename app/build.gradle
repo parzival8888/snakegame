@@ -151,19 +151,19 @@ task copyJreConfMac(type: Copy) {
 // Copy the JRE's bin, lib and conf directory to the build distribution folder - for Windows
 task copyJreBinWin(type: Copy) {
     dependsOn extractJreWin
-    from "$buildDir/jre-extracted/jdk-21.0.4+7-jre/Contents/Home/bin/"
+    from "$buildDir/jre-extracted/jdk-21.0.4+7-jre/bin/"
     into "$buildDir/distributions/app/jre/bin/"
 }
 
 task copyJreLibWin(type: Copy) {
     dependsOn extractJreWin
-    from "$buildDir/jre-extracted/jdk-21.0.4+7-jre/Contents/Home/lib/"
+    from "$buildDir/jre-extracted/jdk-21.0.4+7-jre/lib/"
     into "$buildDir/distributions/app/jre/lib/"
 }
 
 task copyJreConfWin(type: Copy) {
     dependsOn extractJreWin
-    from "$buildDir/jre-extracted/jdk-21.0.4+7-jre/Contents/Home/conf/"
+    from "$buildDir/jre-extracted/jdk-21.0.4+7-jre/conf/"
     into "$buildDir/distributions/app/jre/conf/"
 }
 
