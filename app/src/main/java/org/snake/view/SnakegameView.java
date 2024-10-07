@@ -44,7 +44,7 @@ public class SnakegameView extends JFrame {
     // Constants for panel names
     private static final String START = "Start";
     private static final String NEW_GAME = "New Game";
-    private static final String MENU = "Menu";
+    private static final String MENU = "Main Menu";
     private static final String GAME_HISTORY = "Game History";
     private static final String GAME_LEADERBOARD = "Leaderboard";
 
@@ -55,15 +55,17 @@ public class SnakegameView extends JFrame {
     private static final String LEADERBOARD_LABEL = "Leaderboard";
     private static final String HOW_TO_PLAY_LABEL = "<html><div style='text-align: center;'>"
             + "<h2>How to Play</h2>"
-            + "Use arrow keys to move the snake.<br>"
-            + "Eat food to grow bigger.<br>"
-            + "Avoid hitting the walls or yourself.</div></html>";
+            + "Use arrow keys to move the snake<br>"
+            + "Use P to pause the game<br>"
+            + "Eat food to grow bigger<br>"
+            + "Avoid hitting the walls or yourself</div></html>";
 
     /**
      * Constructs a SnakegameView object and initializes the UI components.
      * It sets up the game model, window properties, and the main user interface.
      * 
-     * @param model The SnakegameModel that contains the logic and state of the game.
+     * @param model The SnakegameModel that contains the logic and state of the
+     *              game.
      */
     public SnakegameView(SnakegameModel model) {
         this.model = model;
@@ -85,7 +87,8 @@ public class SnakegameView extends JFrame {
     }
 
     /**
-     * Creates the main panel for managing different views (start, game, leaderboard, etc.).
+     * Creates the main panel for managing different views (start, game,
+     * leaderboard, etc.).
      * This panel uses a CardLayout to switch between views based on user actions.
      */
     public void createMainPanel() {
@@ -98,7 +101,8 @@ public class SnakegameView extends JFrame {
 
     /**
      * Creates the game panel, which contains the game board, score, and timers.
-     * This method initializes the game board and sets up the layout for the gameplay view.
+     * This method initializes the game board and sets up the layout for the
+     * gameplay view.
      */
     public void createGamePanel() {
         createScorePanel(); // Create score and timer panel
@@ -120,41 +124,41 @@ public class SnakegameView extends JFrame {
     private void createScorePanel() {
         scorePanel = new JPanel(new GridLayout(1, 5, 10, 10)); // Create grid layout for score panel
 
-        scoreLabel = new JLabel(SCORE_LABEL); 
+        scoreLabel = new JLabel(SCORE_LABEL);
 
-        
         gameTimerLabel = new JLabel(GAME_TIME_LABEL);
         gameTimerLabel.setHorizontalAlignment(SwingConstants.CENTER);
 
         sessionTimerLabel = new JLabel(SESSION_TIME_LABEL);
         sessionTimerLabel.setHorizontalAlignment(SwingConstants.CENTER);
 
-        newGameButton = new JButton(NEW_GAME); 
+        newGameButton = new JButton(NEW_GAME);
         newGameButton.setAlignmentX(SwingConstants.RIGHT);
 
         menuButton = new JButton(MENU);
         menuButton.setAlignmentX(SwingConstants.RIGHT);
 
-        scorePanel.add(scoreLabel); 
+        scorePanel.add(scoreLabel);
         scorePanel.add(gameTimerLabel);
         scorePanel.add(sessionTimerLabel);
-        scorePanel.add(newGameButton); 
+        scorePanel.add(newGameButton);
         scorePanel.add(menuButton);
 
         newGameButton.addActionListener(e -> {
             gameboardPanel.startGame();
-            model.setNewGame(true); 
+            model.setNewGame(true);
         });
 
         menuButton.addActionListener(e -> {
-            switchPanel(menuButton.getText()); 
+            switchPanel(menuButton.getText());
         });
     }
-    
+
     /**
-     * Creates the start panel with options for starting a new game, viewing the leaderboard, or game history.
+     * Creates the start panel with options for starting a new game, viewing the
+     * leaderboard, or game history.
      * This is the first screen the user sees when the game starts.
-     */    
+     */
     public void createStartPanel() {
         // Create the panel for the game start, with appropriate menu options
         startPanel = new JPanel();
@@ -175,20 +179,19 @@ public class SnakegameView extends JFrame {
         newGameButton.setFont(buttonFont);
         leaderboardButton.setFont(buttonFont);
         gameHistoryButton.setFont(buttonFont);
-        newGameButton.setBackground(Color.GRAY);
-        newGameButton.setForeground(Color.BLUE);
         newGameButton.setBorder(new BevelBorder(BevelBorder.RAISED));
-        newGameButton.setOpaque(true);
+        leaderboardButton.setBorder(new BevelBorder(BevelBorder.RAISED));
+        gameHistoryButton.setBorder(new BevelBorder(BevelBorder.RAISED));
 
         startPanel.add(newGameButton);
         startPanel.add(leaderboardButton);
         startPanel.add(gameHistoryButton);
 
-        // Create a label for "How to Play" 
+        // Create a label for "How to Play"
         JLabel howToPlayLabel = new JLabel(HOW_TO_PLAY_LABEL);
         howToPlayLabel.setFont(new Font("Arial", Font.PLAIN, 18));
         howToPlayLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        howToPlayLabel.setBorder(BorderFactory.createEmptyBorder(20, 10, 20, 10)); 
+        howToPlayLabel.setBorder(BorderFactory.createEmptyBorder(20, 10, 20, 10));
         startPanel.add(howToPlayLabel);
 
         // Add listeners to handle button clicks
@@ -199,19 +202,30 @@ public class SnakegameView extends JFrame {
 
     /**
      * Creates the leaderboard panel where the top scores are displayed.
-     * It sets up the table for leaderboard data and includes a button to return to the menu.
+     * It sets up the table for leaderboard data and includes a button to return to
+     * the menu.
      */
     private void createLeaderboardPanel() {
         // Create the panel for the leaderboard
         leaderboardPanel = new JPanel();
         leaderboardPanel.setLayout(new BoxLayout(leaderboardPanel, BoxLayout.Y_AXIS));
+
+        // Create the sub-panel for label and button
+        JPanel labelButtonPanel = new JPanel();
+        labelButtonPanel.setLayout(new BoxLayout(labelButtonPanel, BoxLayout.X_AXIS)); // X_AXIS for horizontal
+                                                                                       // arrangement
+
+        JLabel headingLabel = new JLabel(LEADERBOARD_LABEL);
+        headingLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        Font font = new Font("Arial", Font.BOLD, 20); 
+        headingLabel.setFont(font);
         JButton menuButton = new JButton(MENU);
         menuButton.setAlignmentX(Component.CENTER_ALIGNMENT);
-        JLabel headingLabel = new JLabel(LEADERBOARD_LABEL);
-        headingLabel.setHorizontalAlignment(SwingConstants.LEFT);
-        leaderboardPanel.add(headingLabel);
-        menuButton.setHorizontalAlignment(SwingConstants.RIGHT);
-        leaderboardPanel.add(menuButton);
+        labelButtonPanel.add(headingLabel);
+        labelButtonPanel.add(Box.createRigidArea(new Dimension(model.getBoardSize() / 4, 0))); // Add some space between label and button
+        labelButtonPanel.add(menuButton);
+        labelButtonPanel.add(Box.createHorizontalGlue());
+        leaderboardPanel.add(labelButtonPanel);
         mainPanel.add(leaderboardPanel, GAME_LEADERBOARD);
 
         // Show the menu panel
@@ -227,7 +241,8 @@ public class SnakegameView extends JFrame {
     }
 
     /**
-     * Fetches the leaderboard data from the model and updates the leaderboard table.
+     * Fetches the leaderboard data from the model and updates the leaderboard
+     * table.
      * It extracts column names and data from the JSON response and fills the table.
      */
     private void getLeaderboard() {
@@ -261,20 +276,31 @@ public class SnakegameView extends JFrame {
     }
 
     /**
-     * Creates the game history panel where the player's past game records are displayed.
-     * It sets up a table to display the history and includes a button to return to the menu.
+     * Creates the game history panel where the player's past game records are
+     * displayed.
+     * It sets up a table to display the history and includes a button to return to
+     * the menu.
      */
     private void createGameHistoryPanel() {
         // Create the panel for the game history
         gameHistoryPanel = new JPanel();
         gameHistoryPanel.setLayout(new BoxLayout(gameHistoryPanel, BoxLayout.Y_AXIS));
+
+        // Create the sub-panel for label and button
+        JPanel labelButtonPanel = new JPanel();
+        labelButtonPanel.setLayout(new BoxLayout(labelButtonPanel, BoxLayout.X_AXIS)); // X_AXIS for horizontal arrangement
+        
+        JLabel headingLabel = new JLabel(GAME_HISTORY);
+        headingLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        Font font = new Font("Arial", Font.BOLD, 20); 
+        headingLabel.setFont(font);
         JButton menuButton = new JButton(MENU);
         menuButton.setAlignmentX(Component.CENTER_ALIGNMENT);
-        JLabel headingLabel = new JLabel(GAME_HISTORY);
-        headingLabel.setHorizontalAlignment(SwingConstants.LEFT);
-        gameHistoryPanel.add(headingLabel);
-        menuButton.setHorizontalAlignment(SwingConstants.RIGHT);
-        gameHistoryPanel.add(menuButton);
+        labelButtonPanel.add(headingLabel);
+        labelButtonPanel.add(Box.createRigidArea(new Dimension(model.getBoardSize() / 4, 0))); // Add some space between label and button
+        labelButtonPanel.add(menuButton);
+        labelButtonPanel.add(Box.createHorizontalGlue());
+        gameHistoryPanel.add(labelButtonPanel);
         mainPanel.add(gameHistoryPanel, GAME_HISTORY);
 
         // Show the menu panel
@@ -322,14 +348,16 @@ public class SnakegameView extends JFrame {
                 gameHistoryTableModel.setDataVector(data, columnNames);
                 gameHistoryTableModel.fireTableDataChanged();
             }
-        }
+        }          
     }
 
     /**
      * Switches the displayed panel based on the button text (view name).
-     * This method controls navigation between different views like the start menu, game, leaderboard, etc.
+     * This method controls navigation between different views like the start menu,
+     * game, leaderboard, etc.
      * 
-     * @param text The name of the panel to switch to (e.g., "New Game", "Menu", "Leaderboard").
+     * @param text The name of the panel to switch to (e.g., "New Game", "Menu",
+     *             "Leaderboard").
      */
     private void switchPanel(String text) {
         if (text == NEW_GAME) {
@@ -345,7 +373,7 @@ public class SnakegameView extends JFrame {
         } else
             cardLayout.show(mainPanel, START);
     }
-    
+
     /**
      * Adds a listener for the buttons used in the game (e.g., New Game, Menu).
      * The listener responds to user input and triggers the associated actions.

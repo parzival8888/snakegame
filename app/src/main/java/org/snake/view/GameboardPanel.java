@@ -174,19 +174,19 @@ public class GameboardPanel extends JPanel {
                 }
             });
             controlTimer.start(); // Start control timer
+        }
+        // Display the total game play time for the current day
+        sessionTimerLabel.setText("Session time: " + model.getCurrentSessionTime());
 
-            sessionTimerLabel.setText("Session time: " + model.getCurrentSessionTime());
-
-            if (gameTimer == null) {
-                gameTimer = new Timer(sessionTimerInterval, new ActionListener() {
-                    @Override
-                    public void actionPerformed(ActionEvent e) {
-                        gameTime++;
-                        gameTimerLabel.setText("Game time: " + gameTime);
-                    }
-                });
-                gameTimer.start();
-            }
+        if (gameTimer == null) {
+            gameTimer = new Timer(sessionTimerInterval, new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    gameTime++;
+                    gameTimerLabel.setText("Game time: " + gameTime);
+                }
+            });
+            gameTimer.start();
         }
     }
 
