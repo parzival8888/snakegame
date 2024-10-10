@@ -85,7 +85,7 @@ public class DataHandlerTest {
     @Test
     public void testInsertSessionTable() {
         dataHandler.createSessionTable();
-        dataHandler.insertSessionTable(3600);
+        dataHandler.insertSessionTable(3600, 1);
 
         try (Connection conn = DriverManager.getConnection("jdbc:sqlite:snakegame.db");
              Statement stmt = conn.createStatement();
@@ -100,7 +100,7 @@ public class DataHandlerTest {
     @Test
     public void testReadSessionTable() {
         dataHandler.createSessionTable();
-        dataHandler.insertSessionTable(3600);
+        dataHandler.insertSessionTable(3600, 1);
         String jsonData = dataHandler.readSessionTable();
 
         assertNotNull(jsonData, "Returned JSON data should not be null");
@@ -122,7 +122,7 @@ public class DataHandlerTest {
     @Test
     public void testReadSessionTableByDate() {
         dataHandler.createSessionTable();
-        dataHandler.insertSessionTable(7200);  // Insert for today
+        dataHandler.insertSessionTable(7200, 2);  // Insert for today
         LocalDateTime now = LocalDateTime.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         String today = now.format(formatter);

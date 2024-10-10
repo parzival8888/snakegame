@@ -38,8 +38,9 @@ public class SnakegameModel {
     private int wallRight; 
     private int currentScore; 
     private int gameTimeAllowed; 
-    private int topSomething; 
+    private int topscorestodisplay; 
     private int currentSessionTime; 
+    private int currentSessionGamesPlayed;
     private DataHandler dataHandler; 
     private Snake snake; 
     private Cell food; 
@@ -89,8 +90,8 @@ public class SnakegameModel {
         this.boardGridColour = Color.decode(ConfigReader.getProperty("boardgridcolour"));
         this.timerInterval = Integer.parseInt(ConfigReader.getProperty("timerinterval"));
         this.direction = ConfigReader.getProperty("startdirection").charAt(0);
-        this.gameTimeAllowed = Integer.parseInt(ConfigReader.getProperty("gametimeallowed"));
-        this.topSomething = Integer.parseInt(ConfigReader.getProperty("topsomething"));
+        this.topscorestodisplay = Integer.parseInt(ConfigReader.getProperty("topscorestodisplay"));
+        this.gameTimeAllowed = 30000; // Hard coded at request of customer to prevent player from updating
 
         // Adjust board size to ensure it's divisible by number of columns.
         this.boardSize = this.numberOfColumns * this.cellSize;
@@ -202,6 +203,24 @@ public class SnakegameModel {
     }
 
     /**
+     * Retrieves all configuration settings for the game.
+     *
+     * @return A multi-dimensional array containing the properties
+     */
+    public Object[][] getAllProperties() {
+        return ConfigReader.getAllProperties();
+    }
+
+    /**
+     * Saves all configuration settings for the game.
+     *
+     * @param properties A multi-dimensional array containing the properties
+     */
+    public void saveAllProperties(Object[][] properties) {
+        ConfigReader.saveAllProperties(CONFIG_FILENAME, properties);
+    }
+    
+    /**
      * Checks if the game is currently over.
      *
      * @return A boolean indicating whether or not the game is over.
@@ -274,8 +293,7 @@ public class SnakegameModel {
      *
      * @return An integer representing total session time played today in seconds.
      */
-    public int getSessionTime() {
-        int sessionTime;
+    private void getSessionTime() {
         LocalDateTime currentTime = LocalDateTime.now();
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
@@ -283,12 +301,14 @@ public class SnakegameModel {
 
         JSONObject sessionInfo = new JSONObject(dataHandler.readSessionTableByDate(formattedDateTime));
 
-        if (sessionInfo.isEmpty())
-            sessionTime = 0;
-        else
-            sessionTime = sessionInfo.getInt("duration");
-
-        return sessionTime;
+        if (sessionInfo.isEmpty()) {
+            currentSessionTime = 0;
+            currentSessionGamesPlayed = 0;
+        }
+        else {
+            currentSessionTime = sessionInfo.getInt("duration");
+            currentSessionGamesPlayed = sessionInfo.getInt("gamesplayed");
+        }
     }
 
     /**
@@ -298,7 +318,7 @@ public class SnakegameModel {
      *         timestamps.
      */
     public JSONArray getLeaderboard() {
-        String sLeaderboard = dataHandler.readLeaderboard(topSomething);
+        String sLeaderboard = dataHandler.readLeaderboard(topscorestodisplay);
         JSONArray leaderboard;
 
         if (sLeaderboard == null)
@@ -316,7 +336,7 @@ public class SnakegameModel {
      * @return A JSONArray containing historical gameplay entries with durations.
      */
     public JSONArray getGameHistory() {
-        JSONArray gameHistory = new JSONArray(dataHandler.readDurationPlayed());
+        JSONArray gameHistory = new JSONArray(dataHandler.readSessionTable());
         return gameHistory;
     }
 
@@ -431,7 +451,8 @@ public class SnakegameModel {
      */
     public void storeGameTime(int gameTime) {
         this.currentSessionTime += gameTime;
-        dataHandler.insertSessionTable(currentSessionTime);
+        this.currentSessionGamesPlayed++;
+        dataHandler.insertSessionTable(currentSessionTime, currentSessionGamesPlayed);
         dataHandler.insertGameTable(gameTime, currentScore);
     }
 
@@ -445,10 +466,8 @@ public class SnakegameModel {
 */     
 public boolean startNewGame() {     
       this.initialiseSnake();     
-      
       this.placeFood();     
-      
-      this.currentSessionTime = this.getSessionTime();     
+      this.getSessionTime();     
 
       if (this.currentSessionTime > this.gameTimeAllowed) {     
           this.dailyTimeUsed = true;     

@@ -9,7 +9,6 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 import org.json.JSONArray;
-import org.json.JSONObject;
 import org.snake.database.DataHandler;
 import org.snake.util.Cell;
 import org.snake.util.ConfigReader;
@@ -37,8 +36,8 @@ class SnakegameModelTest {
             when(ConfigReader.getProperty("boardgridcolour")).thenReturn("#000000");
             when(ConfigReader.getProperty("timerinterval")).thenReturn("1000");
             when(ConfigReader.getProperty("startdirection")).thenReturn("U");
-            when(ConfigReader.getProperty("gametimeallowed")).thenReturn("60");
-            when(ConfigReader.getProperty("topsomething")).thenReturn("6");
+            when(ConfigReader.getProperty("gametimeallowed")).thenReturn("30000");
+            when(ConfigReader.getProperty("topscorestodisplay")).thenReturn("6");
 
             // Mock DataHandler
             dataHandlerMock = mock(DataHandler.class);
@@ -53,7 +52,7 @@ class SnakegameModelTest {
         assertEquals(20, model.getNumberOfColumns());
         assertEquals(1000, model.getTimerInterval());
         assertEquals('U', model.getDirection());
-        assertEquals(60, model.getGameTimeAllowed());
+        assertEquals(30000, model.getGameTimeAllowed());
         assertEquals(Color.decode("#FFFFFF"), model.getBoardColour());
         assertEquals(Color.decode("#000000"), model.getBoardGridColour());
     }
@@ -136,7 +135,7 @@ class SnakegameModelTest {
     @Test
     void testStoreGameTime() { 
         model.storeGameTime(30);
-        verify(dataHandlerMock).insertSessionTable(anyInt());
+        verify(dataHandlerMock).insertSessionTable(anyInt(), anyInt());
         verify(dataHandlerMock).insertGameTable(anyInt(), anyInt());
     }
 
@@ -146,17 +145,6 @@ class SnakegameModelTest {
         model.startNewGame();
         assertFalse(model.isGameOver());
         assertFalse(model.isTimeAllocationUsed());
-    }
-
-    @Test
-    void testGetSessionTime() {
-        when(dataHandlerMock.readSessionTableByDate(anyString())).thenReturn("{}");
-        assertEquals(0, model.getSessionTime());
-
-        JSONObject sessionInfo = new JSONObject();
-        sessionInfo.put("duration", 30);
-        when(dataHandlerMock.readSessionTableByDate(anyString())).thenReturn(sessionInfo.toString());
-        assertEquals(30, model.getSessionTime());
     }
 
     @Test

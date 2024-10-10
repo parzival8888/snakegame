@@ -34,7 +34,6 @@ public class DataHandler {
     private static final String INSERT_GAME_SQL = "INSERT INTO game_history(timestamp, duration, score) VALUES(?, ?, ?)";
     private static final String READ_GAME_SQL = "SELECT * FROM game_history";
     private static final String READ_LEADERBOARD_SQL = "SELECT * FROM game_history ORDER BY score DESC LIMIT ?";
-    private static final String READ_TOTAL_DURATION_SQL = "SELECT strftime('%Y-%m-%d', timestamp) AS date, sum(duration) AS total_duration FROM game_history GROUP BY strftime('%Y-%m-%d', timestamp);";
     private static final String ROW_ID_SQL = "SELECT last_insert_rowid()";
 
     /**
@@ -43,11 +42,12 @@ public class DataHandler {
      */
     private static final String CREATE_SESSION_TABLE_SQL = "CREATE TABLE IF NOT EXISTS game_session ("
             + "date TEXT PRIMARY KEY, "
-            + "duration INTEGER NOT NULL "
+            + "duration INTEGER NOT NULL, "
+            + "gamesplayed INTEGER NOT NULL "
             + ");";
 
     // SQL statements for inserting and reading session data
-    private static final String INSERT_SESSION_SQL = "INSERT OR REPLACE INTO game_session(date, duration) VALUES(?, ?)";
+    private static final String INSERT_SESSION_SQL = "INSERT OR REPLACE INTO game_session(date, duration, gamesplayed) VALUES(?, ?, ?)";
     private static final String READ_SESSION_SQL = "SELECT * FROM game_session";
     private static final String READ_SESSION_BY_DATE_SQL = "SELECT * FROM game_session WHERE date = ?";
 
@@ -88,15 +88,15 @@ public class DataHandler {
     /**
      * Reads the leaderboard from the game history table, returning the top scores as a JSON array.
      *
-     * @param topSomething The number of top scores to retrieve.
+     * @param topscorestodisplay The number of top scores to retrieve.
      * @return A JSON array containing the top scores from the leaderboard.
      */
-    public String readLeaderboard(int topSomething) {
+    public String readLeaderboard(int topscorestodisplay) {
         JSONArray jsonArray = new JSONArray();
         try {
             conn = DriverManager.getConnection(connectionURL);
             PreparedStatement pstmtSelect = conn.prepareStatement(READ_LEADERBOARD_SQL);
-            pstmtSelect.setInt(1, topSomething);
+            pstmtSelect.setInt(1, topscorestodisplay);
             ResultSet rs = pstmtSelect.executeQuery();
             while (rs.next()) {
                 JSONObject jsonObject = new JSONObject();
@@ -106,31 +106,6 @@ public class DataHandler {
                 jsonArray.put(jsonObject);
             }
             pstmtSelect.close();
-            conn.close();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return jsonArray.toString();
-    }
-
-    /**
-     * Reads total duration played by date from the game history table and returns it as a JSON array.
-     *
-     * @return A JSON array containing total durations grouped by date.
-     */
-    public String readDurationPlayed() {
-        JSONArray jsonArray = new JSONArray();
-        try {
-            conn = DriverManager.getConnection(connectionURL);
-            Statement stmtSelect = conn.createStatement();
-            ResultSet rs = stmtSelect.executeQuery(READ_TOTAL_DURATION_SQL);
-            while (rs.next()) {
-                JSONObject jsonObject = new JSONObject();
-                jsonObject.put("date", rs.getString("date"));
-                jsonObject.put("total_duration", rs.getInt("total_duration"));
-                jsonArray.put(jsonObject);
-            }
-            stmtSelect.close();
             conn.close();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -206,6 +181,7 @@ public class DataHandler {
                 JSONObject jsonObject = new JSONObject();
                 jsonObject.put("date", rs.getString("date"));
                 jsonObject.put("duration", rs.getInt("duration"));
+                jsonObject.put("gamesplayed", rs.getInt("gamesplayed"));
                 jsonArray.put(jsonObject);
             }
             
@@ -234,6 +210,7 @@ public class DataHandler {
            while (rs.next()) {
                jsonObject.put("date", rs.getString("date"));
                jsonObject.put("duration", rs.getInt("duration"));
+               jsonObject.put("gamesplayed", rs.getInt("gamesplayed"));
            }
 
            pstmtRead.close();
@@ -263,8 +240,9 @@ public class DataHandler {
     * Inserts or updates session data with total duration for today into the session table.
     *
     * @param gameDuration The total duration of games played during this session.
+    * @param gamesPlayed Number of games played during this session.
     */
-   public void insertSessionTable(int gameDuration) { 
+   public void insertSessionTable(int gameDuration, int gamesPlayed) { 
        try { 
            conn = DriverManager.getConnection(connectionURL); 
            PreparedStatement pstmtInsert = conn.prepareStatement(INSERT_SESSION_SQL); 
@@ -275,6 +253,7 @@ public class DataHandler {
 
            pstmtInsert.setString(1, formattedDateTime); 
            pstmtInsert.setInt(2, gameDuration); 
+           pstmtInsert.setInt(3, gamesPlayed); 
            pstmtInsert.executeUpdate(); 
 
            pstmtInsert.close(); 

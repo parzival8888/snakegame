@@ -4,6 +4,7 @@ import javax.swing.*;
 import javax.swing.border.BevelBorder;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -30,6 +31,8 @@ public class SnakegameView extends JFrame {
     private DefaultTableModel leaderboardTableModel;
     private JTable gameHistoryTable;
     private DefaultTableModel gameHistoryTableModel;
+    private JTable gameSettingsTable;
+    private DefaultTableModel gameSettingsTableModel;
 
     // Panels for different views in the application
     private JPanel mainPanel;
@@ -38,6 +41,7 @@ public class SnakegameView extends JFrame {
     private JPanel scorePanel;
     private JPanel leaderboardPanel;
     private JPanel gameHistoryPanel;
+    private JPanel gameSettingsPanel;
 
     private CardLayout cardLayout;
 
@@ -47,8 +51,10 @@ public class SnakegameView extends JFrame {
     private static final String MENU = "Main Menu";
     private static final String GAME_HISTORY = "Game History";
     private static final String GAME_LEADERBOARD = "Leaderboard";
+    private static final String GAME_SETTINGS = "Game Settings";
 
     // Constants for labels
+    private static final String SAVE_SETTINGS = "Save Settings";
     private static final String SCORE_LABEL = "Score:";
     private static final String GAME_TIME_LABEL = "Game time:";
     private static final String SESSION_TIME_LABEL = "Session time:";
@@ -78,6 +84,7 @@ public class SnakegameView extends JFrame {
         createMainPanel(); // Initialize main panel to switch between views
         createLeaderboardPanel(); // Initialize leaderboard panel
         createGameHistoryPanel(); // Initialize game history panel
+        createGameSettingsPanel(); // Initialize game settings panel
 
         add(mainPanel); // Add main panel to frame
 
@@ -163,7 +170,7 @@ public class SnakegameView extends JFrame {
         // Create the panel for the game start, with appropriate menu options
         startPanel = new JPanel();
         // startPanel.setLayout(new BoxLayout(startPanel, BoxLayout.Y_AXIS));
-        startPanel.setLayout(new GridLayout(4, 1, 10, 10));
+        startPanel.setLayout(new GridLayout(5, 1, 10, 10));
         startPanel.setBorder(BorderFactory.createEmptyBorder(10, 100, 10, 100));
 
         // Add buttons to the startPanel
@@ -173,19 +180,24 @@ public class SnakegameView extends JFrame {
         leaderboardButton.setAlignmentX(Component.CENTER_ALIGNMENT);
         JButton gameHistoryButton = new JButton(GAME_HISTORY);
         gameHistoryButton.setAlignmentX(Component.CENTER_ALIGNMENT);
+        JButton gameSettingsButton = new JButton(GAME_SETTINGS);
+        gameSettingsButton.setAlignmentX(Component.CENTER_ALIGNMENT);
 
         // Big font for the buttons
         Font buttonFont = new Font("Arial", Font.BOLD, 24);
         newGameButton.setFont(buttonFont);
         leaderboardButton.setFont(buttonFont);
         gameHistoryButton.setFont(buttonFont);
+        gameSettingsButton.setFont(buttonFont);
         newGameButton.setBorder(new BevelBorder(BevelBorder.RAISED));
         leaderboardButton.setBorder(new BevelBorder(BevelBorder.RAISED));
         gameHistoryButton.setBorder(new BevelBorder(BevelBorder.RAISED));
+        gameSettingsButton.setBorder(new BevelBorder(BevelBorder.RAISED));
 
         startPanel.add(newGameButton);
         startPanel.add(leaderboardButton);
         startPanel.add(gameHistoryButton);
+        startPanel.add(gameSettingsButton);
 
         // Create a label for "How to Play"
         JLabel howToPlayLabel = new JLabel(HOW_TO_PLAY_LABEL);
@@ -198,6 +210,7 @@ public class SnakegameView extends JFrame {
         newGameButton.addActionListener(e -> switchPanel(newGameButton.getText()));
         leaderboardButton.addActionListener(e -> switchPanel(leaderboardButton.getText()));
         gameHistoryButton.addActionListener(e -> switchPanel(gameHistoryButton.getText()));
+        gameSettingsButton.addActionListener(e -> switchPanel(gameSettingsButton.getText()));
     }
 
     /**
@@ -217,12 +230,13 @@ public class SnakegameView extends JFrame {
 
         JLabel headingLabel = new JLabel(LEADERBOARD_LABEL);
         headingLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
-        Font font = new Font("Arial", Font.BOLD, 20); 
+        Font font = new Font("Arial", Font.BOLD, 20);
         headingLabel.setFont(font);
         JButton menuButton = new JButton(MENU);
         menuButton.setAlignmentX(Component.CENTER_ALIGNMENT);
         labelButtonPanel.add(headingLabel);
-        labelButtonPanel.add(Box.createRigidArea(new Dimension(model.getBoardSize() / 4, 0))); // Add some space between label and button
+        labelButtonPanel.add(Box.createRigidArea(new Dimension(model.getBoardSize() / 4, 0))); // Add some space between
+                                                                                               // label and button
         labelButtonPanel.add(menuButton);
         labelButtonPanel.add(Box.createHorizontalGlue());
         leaderboardPanel.add(labelButtonPanel);
@@ -288,16 +302,18 @@ public class SnakegameView extends JFrame {
 
         // Create the sub-panel for label and button
         JPanel labelButtonPanel = new JPanel();
-        labelButtonPanel.setLayout(new BoxLayout(labelButtonPanel, BoxLayout.X_AXIS)); // X_AXIS for horizontal arrangement
-        
+        labelButtonPanel.setLayout(new BoxLayout(labelButtonPanel, BoxLayout.X_AXIS)); // X_AXIS for horizontal
+                                                                                       // arrangement
+
         JLabel headingLabel = new JLabel(GAME_HISTORY);
         headingLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
-        Font font = new Font("Arial", Font.BOLD, 20); 
+        Font font = new Font("Arial", Font.BOLD, 20);
         headingLabel.setFont(font);
         JButton menuButton = new JButton(MENU);
         menuButton.setAlignmentX(Component.CENTER_ALIGNMENT);
         labelButtonPanel.add(headingLabel);
-        labelButtonPanel.add(Box.createRigidArea(new Dimension(model.getBoardSize() / 4, 0))); // Add some space between label and button
+        labelButtonPanel.add(Box.createRigidArea(new Dimension(model.getBoardSize() / 4, 0))); // Add some space between
+                                                                                               // label and button
         labelButtonPanel.add(menuButton);
         labelButtonPanel.add(Box.createHorizontalGlue());
         gameHistoryPanel.add(labelButtonPanel);
@@ -314,14 +330,15 @@ public class SnakegameView extends JFrame {
 
         // Add the JScrollPane to the JPanel
         gameHistoryPanel.add(scrollPane, BorderLayout.SOUTH);
-        this.getGAME_HISTORY();
+        this.getGameHistory();
     }
 
     /**
-     * Fetches the game history data from the model and updates the game history table.
+     * Fetches the game history data from the model and updates the game history
+     * table.
      * It extracts column names and data from the JSON response and fills the table.
      */
-    private void getGAME_HISTORY() {
+    private void getGameHistory() {
         // Get the leaderboard from the model
         JSONArray gameHistory = model.getGameHistory();
 
@@ -348,7 +365,84 @@ public class SnakegameView extends JFrame {
                 gameHistoryTableModel.setDataVector(data, columnNames);
                 gameHistoryTableModel.fireTableDataChanged();
             }
-        }          
+        }
+    }
+
+    /**
+     * Creates the game settings panel where the player's can change the game
+     * config.
+     */
+    private void createGameSettingsPanel() {
+        // Create the panel for the game settings
+        gameSettingsPanel = new JPanel();
+        gameSettingsPanel.setLayout(new BoxLayout(gameSettingsPanel, BoxLayout.Y_AXIS));
+
+        // Create the sub-panel for label and button
+        JPanel labelButtonPanel = new JPanel();
+        labelButtonPanel.setLayout(new BoxLayout(labelButtonPanel, BoxLayout.X_AXIS)); // X_AXIS for horizontal
+                                                                                       // arrangement
+
+        JLabel headingLabel = new JLabel(GAME_SETTINGS);
+        headingLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        Font font = new Font("Arial", Font.BOLD, 20);
+        headingLabel.setFont(font);
+        JButton saveButton = new JButton(SAVE_SETTINGS);
+        saveButton.setAlignmentX(Component.CENTER_ALIGNMENT);
+        JButton menuButton = new JButton(MENU);
+        menuButton.setAlignmentX(Component.CENTER_ALIGNMENT);
+        labelButtonPanel.add(headingLabel);
+        labelButtonPanel.add(Box.createRigidArea(new Dimension(model.getBoardSize() / 4, 0))); // Add some space between
+                                                                                               // label and button
+        labelButtonPanel.add(saveButton);
+        labelButtonPanel.add(menuButton);
+        labelButtonPanel.add(Box.createHorizontalGlue());
+        gameSettingsPanel.add(labelButtonPanel);
+        mainPanel.add(gameSettingsPanel, GAME_SETTINGS);
+
+        // Create the JTable with data and column names
+        gameSettingsTable = new JTable();
+
+        // Add the JTable to a JScrollPane
+        JScrollPane scrollPane = new JScrollPane(gameSettingsTable);
+
+        // Add the JScrollPane to the JPanel
+        gameSettingsPanel.add(scrollPane, BorderLayout.SOUTH);
+
+        Object[][] data = model.getAllProperties();
+        String[] columnNames = { "Property", "Value" };
+
+        // Update the JTable with data and column names
+        if (gameSettingsTableModel == null) {
+            gameSettingsTableModel = new DefaultTableModel(data, columnNames);
+            gameSettingsTable.setModel(gameSettingsTableModel);
+        } else {
+            gameSettingsTableModel.setDataVector(data, columnNames);
+            gameSettingsTableModel.fireTableDataChanged();
+        }
+
+        // Show the menu panel
+        menuButton.addActionListener(e -> switchPanel(menuButton.getText()));
+        // Save properties
+        saveButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                saveGameSettings();
+            }
+        });
+    }
+
+    /**
+     * Saves the game settings.
+     */
+    private void saveGameSettings() {
+        int numberOfProperties = gameSettingsTableModel.getRowCount();
+        Object[][] data = new Object[numberOfProperties][2];
+
+        for (int i = 0; i < numberOfProperties; i++) {
+            data[i][0] = (String) gameSettingsTableModel.getValueAt(i, 0);
+            data[i][1] = (String) gameSettingsTableModel.getValueAt(i, 1);
+        }
+        model.saveAllProperties(data);
     }
 
     /**
@@ -369,7 +463,10 @@ public class SnakegameView extends JFrame {
             this.getLeaderboard();
         } else if (text == GAME_HISTORY) {
             cardLayout.show(mainPanel, GAME_HISTORY);
-            this.getGAME_HISTORY();
+            this.getGameHistory();
+        } else if (text == GAME_SETTINGS) {
+            cardLayout.show(mainPanel, GAME_SETTINGS);
+            // this.getGameHistory();
         } else
             cardLayout.show(mainPanel, START);
     }
