@@ -158,6 +158,9 @@ public class GameboardPanel extends JPanel {
         System.out.println("Food positioned at x: " + food.getX());
 
         if (controlTimer != null && !controlTimer.isRunning()) {
+            // Player may have changed the timer interval setting, so reload it
+            this.timerInterval = model.getTimerInterval();
+            controlTimer.setDelay(timerInterval);
             controlTimer.restart(); // Restart timer if already created and not running
         } else if (controlTimer == null) {
             controlTimer = new Timer(timerInterval, new ActionListener() {

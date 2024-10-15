@@ -31,6 +31,8 @@ public class SnakegameView extends JFrame {
     private DefaultTableModel leaderboardTableModel;
     private JTable gameHistoryTable;
     private DefaultTableModel gameHistoryTableModel;
+    private JTable dailyStatsTable;
+    private DefaultTableModel dailyStatsTableModel;
     private JTable gameSettingsTable;
     private DefaultTableModel gameSettingsTableModel;
 
@@ -41,6 +43,7 @@ public class SnakegameView extends JFrame {
     private JPanel scorePanel;
     private JPanel leaderboardPanel;
     private JPanel gameHistoryPanel;
+    private JPanel dailyStatsPanel;
     private JPanel gameSettingsPanel;
 
     private CardLayout cardLayout;
@@ -51,6 +54,7 @@ public class SnakegameView extends JFrame {
     private static final String MENU = "Main Menu";
     private static final String GAME_HISTORY = "Game History";
     private static final String GAME_LEADERBOARD = "Leaderboard";
+    private static final String DAILY_STATS = "Daily Stats";
     private static final String GAME_SETTINGS = "Game Settings";
 
     // Constants for labels
@@ -84,6 +88,7 @@ public class SnakegameView extends JFrame {
         createMainPanel(); // Initialize main panel to switch between views
         createLeaderboardPanel(); // Initialize leaderboard panel
         createGameHistoryPanel(); // Initialize game history panel
+        createDailyStatsPanel(); // Initialize daily player stats panel
         createGameSettingsPanel(); // Initialize game settings panel
 
         add(mainPanel); // Add main panel to frame
@@ -170,7 +175,7 @@ public class SnakegameView extends JFrame {
         // Create the panel for the game start, with appropriate menu options
         startPanel = new JPanel();
         // startPanel.setLayout(new BoxLayout(startPanel, BoxLayout.Y_AXIS));
-        startPanel.setLayout(new GridLayout(5, 1, 10, 10));
+        startPanel.setLayout(new GridLayout(6, 1, 10, 10));
         startPanel.setBorder(BorderFactory.createEmptyBorder(10, 100, 10, 100));
 
         // Add buttons to the startPanel
@@ -180,6 +185,8 @@ public class SnakegameView extends JFrame {
         leaderboardButton.setAlignmentX(Component.CENTER_ALIGNMENT);
         JButton gameHistoryButton = new JButton(GAME_HISTORY);
         gameHistoryButton.setAlignmentX(Component.CENTER_ALIGNMENT);
+        JButton dailyStatsButton = new JButton(DAILY_STATS);
+        dailyStatsButton.setAlignmentX(Component.CENTER_ALIGNMENT);
         JButton gameSettingsButton = new JButton(GAME_SETTINGS);
         gameSettingsButton.setAlignmentX(Component.CENTER_ALIGNMENT);
 
@@ -188,15 +195,18 @@ public class SnakegameView extends JFrame {
         newGameButton.setFont(buttonFont);
         leaderboardButton.setFont(buttonFont);
         gameHistoryButton.setFont(buttonFont);
+        dailyStatsButton.setFont(buttonFont);
         gameSettingsButton.setFont(buttonFont);
         newGameButton.setBorder(new BevelBorder(BevelBorder.RAISED));
         leaderboardButton.setBorder(new BevelBorder(BevelBorder.RAISED));
         gameHistoryButton.setBorder(new BevelBorder(BevelBorder.RAISED));
+        dailyStatsButton.setBorder(new BevelBorder(BevelBorder.RAISED));
         gameSettingsButton.setBorder(new BevelBorder(BevelBorder.RAISED));
 
         startPanel.add(newGameButton);
         startPanel.add(leaderboardButton);
         startPanel.add(gameHistoryButton);
+        startPanel.add(dailyStatsButton);
         startPanel.add(gameSettingsButton);
 
         // Create a label for "How to Play"
@@ -210,6 +220,7 @@ public class SnakegameView extends JFrame {
         newGameButton.addActionListener(e -> switchPanel(newGameButton.getText()));
         leaderboardButton.addActionListener(e -> switchPanel(leaderboardButton.getText()));
         gameHistoryButton.addActionListener(e -> switchPanel(gameHistoryButton.getText()));
+        dailyStatsButton.addActionListener(e -> switchPanel(dailyStatsButton.getText()));
         gameSettingsButton.addActionListener(e -> switchPanel(gameSettingsButton.getText()));
     }
 
@@ -369,6 +380,85 @@ public class SnakegameView extends JFrame {
     }
 
     /**
+     * Creates the game history panel where the player's past game records are
+     * displayed.
+     * It sets up a table to display the history and includes a button to return to
+     * the menu.
+     */
+    private void createDailyStatsPanel() {
+        // Create the panel for the daily player stats
+        dailyStatsPanel = new JPanel();
+        dailyStatsPanel.setLayout(new BoxLayout(dailyStatsPanel, BoxLayout.Y_AXIS));
+
+        // Create the sub-panel for label and button
+        JPanel labelButtonPanel = new JPanel();
+        labelButtonPanel.setLayout(new BoxLayout(labelButtonPanel, BoxLayout.X_AXIS)); // X_AXIS for horizontal
+                                                                                       // arrangement
+
+        JLabel headingLabel = new JLabel(DAILY_STATS);
+        headingLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        Font font = new Font("Arial", Font.BOLD, 20);
+        headingLabel.setFont(font);
+        JButton menuButton = new JButton(MENU);
+        menuButton.setAlignmentX(Component.CENTER_ALIGNMENT);
+        labelButtonPanel.add(headingLabel);
+        labelButtonPanel.add(Box.createRigidArea(new Dimension(model.getBoardSize() / 4, 0))); // Add some space between
+                                                                                               // label and button
+        labelButtonPanel.add(menuButton);
+        labelButtonPanel.add(Box.createHorizontalGlue());
+        dailyStatsPanel.add(labelButtonPanel);
+        mainPanel.add(dailyStatsPanel, DAILY_STATS);
+
+        // Show the menu panel
+        menuButton.addActionListener(e -> switchPanel(menuButton.getText()));
+
+        // Create the JTable with data and column names
+        dailyStatsTable = new JTable();
+
+        // Add the JTable to a JScrollPane
+        JScrollPane scrollPane = new JScrollPane(dailyStatsTable);
+
+        // Add the JScrollPane to the JPanel
+        dailyStatsPanel.add(scrollPane, BorderLayout.SOUTH);
+        this.getDailyStats();
+    }
+
+    /**
+     * Fetches the daily player stats from the model and updates the daily stats
+     * table.
+     * It extracts column names and data from the JSON response and fills the table.
+     */
+    private void getDailyStats() {
+        // Get the leaderboard from the model
+        JSONArray dailyStats = model.getDailyStats();
+
+        if (dailyStats.length() > 0) {
+            // Extract column names
+            String[] columnNames = JSONObject.getNames(dailyStats.getJSONObject(0));
+
+            // Create data array for JTable
+            Object[][] data = new Object[dailyStats.length()][columnNames.length];
+
+            // Loop through the JSONArray and extract the values
+            for (int i = 0; i < dailyStats.length(); i++) {
+                JSONObject obj = dailyStats.getJSONObject(i);
+                for (int j = 0; j < columnNames.length; j++) {
+                    data[i][j] = obj.get(columnNames[j]);
+                }
+            }
+
+            // Update the JTable with data and column names
+            if (dailyStatsTableModel == null) {
+                dailyStatsTableModel = new DefaultTableModel(data, columnNames);
+                dailyStatsTable.setModel(dailyStatsTableModel);
+            } else {
+                dailyStatsTableModel.setDataVector(data, columnNames);
+                dailyStatsTableModel.fireTableDataChanged();
+            }
+        }
+    }
+
+    /**
      * Creates the game settings panel where the player's can change the game
      * config.
      */
@@ -427,6 +517,10 @@ public class SnakegameView extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 saveGameSettings();
+                JOptionPane.showMessageDialog(gameSettingsPanel, "Game settings saved!", "Game Settings", JOptionPane.INFORMATION_MESSAGE);
+                // Adjust the JFrame if the board size has changed
+                int height = model.getBoardSize() + (model.getBoardSize() * 10 / 100); // Set frame size
+                setSize(model.getBoardSize(), height);
             }
         });
     }
@@ -464,9 +558,11 @@ public class SnakegameView extends JFrame {
         } else if (text == GAME_HISTORY) {
             cardLayout.show(mainPanel, GAME_HISTORY);
             this.getGameHistory();
+        } else if (text == DAILY_STATS) {
+            cardLayout.show(mainPanel, DAILY_STATS);
+            this.getDailyStats();
         } else if (text == GAME_SETTINGS) {
             cardLayout.show(mainPanel, GAME_SETTINGS);
-            // this.getGameHistory();
         } else
             cardLayout.show(mainPanel, START);
     }

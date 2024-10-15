@@ -136,7 +136,7 @@ class SnakegameModelTest {
     void testStoreGameTime() { 
         model.storeGameTime(30);
         verify(dataHandlerMock).insertSessionTable(anyInt(), anyInt());
-        verify(dataHandlerMock).insertGameTable(anyInt(), anyInt());
+        verify(dataHandlerMock).insertGameTable(anyInt(), anyInt(), anyInt());
     }
 
     @Test

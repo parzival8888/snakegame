@@ -27,11 +27,12 @@ public class DataHandler {
             + "rowid INTEGER PRIMARY KEY AUTOINCREMENT, "
             + "timestamp TEXT NOT NULL, "
             + "duration INTEGER NOT NULL, "
+            + "snakelength INTEGER NOT NULL, "
             + "score INTEGER NOT NULL"
             + ");";
 
     // SQL statements for inserting and reading game data
-    private static final String INSERT_GAME_SQL = "INSERT INTO game_history(timestamp, duration, score) VALUES(?, ?, ?)";
+    private static final String INSERT_GAME_SQL = "INSERT INTO game_history(timestamp, duration, snakelength, score) VALUES(?, ?, ?, ?)";
     private static final String READ_GAME_SQL = "SELECT * FROM game_history";
     private static final String READ_LEADERBOARD_SQL = "SELECT * FROM game_history ORDER BY score DESC LIMIT ?";
     private static final String ROW_ID_SQL = "SELECT last_insert_rowid()";
@@ -74,6 +75,7 @@ public class DataHandler {
                 JSONObject jsonObject = new JSONObject();
                 jsonObject.put("timestamp", rs.getString("timestamp"));
                 jsonObject.put("duration", rs.getInt("duration"));
+                jsonObject.put("snakelength", rs.getInt("snakelength"));
                 jsonObject.put("score", rs.getInt("score"));
                 jsonArray.put(jsonObject);
             }
@@ -102,6 +104,7 @@ public class DataHandler {
                 JSONObject jsonObject = new JSONObject();
                 jsonObject.put("timestamp", rs.getString("timestamp"));
                 jsonObject.put("duration", rs.getInt("duration"));
+                jsonObject.put("snakelength", rs.getInt("snakelength"));
                 jsonObject.put("score", rs.getInt("score"));
                 jsonArray.put(jsonObject);
             }
@@ -135,7 +138,7 @@ public class DataHandler {
      * @param gameScore The score achieved in that game.
      * @return The ID of the last inserted row.
      */
-    public long insertGameTable(int gameDuration, int gameScore) {
+    public long insertGameTable(int gameDuration, int snakelength, int gameScore) {
         long lastInsertedRowId = 0;
         try {
             conn = DriverManager.getConnection(connectionURL);
@@ -148,7 +151,8 @@ public class DataHandler {
             
             pstmtInsert.setString(1, formattedDateTime);
             pstmtInsert.setInt(2, gameDuration);
-            pstmtInsert.setInt(3, gameScore);
+            pstmtInsert.setInt(3, snakelength);
+            pstmtInsert.setInt(4, gameScore);
             
             pstmtInsert.executeUpdate(); // Execute insert
             

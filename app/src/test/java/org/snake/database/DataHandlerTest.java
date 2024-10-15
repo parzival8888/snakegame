@@ -43,7 +43,7 @@ public class DataHandlerTest {
     @Test
     public void testInsertGameTable() {
         dataHandler.createGameTable();
-        long rowId = dataHandler.insertGameTable(120, 500);
+        long rowId = dataHandler.insertGameTable(120, 25, 500);
 
         assertTrue(rowId > 0, "RowId should be greater than 0 after insert");
 
@@ -52,6 +52,7 @@ public class DataHandlerTest {
              ResultSet rs = stmt.executeQuery("SELECT * FROM game_history WHERE rowid = " + rowId)) {
             assertTrue(rs.next(), "Inserted game record should be retrievable");
             assertEquals(120, rs.getInt("duration"), "Duration should match the inserted value");
+            assertEquals(25, rs.getInt("snakelength"), "Snake length should match the inserted value");
             assertEquals(500, rs.getInt("score"), "Score should match the inserted value");
         } catch (Exception e) {
             fail("Exception occurred: " + e.getMessage());
@@ -61,11 +62,12 @@ public class DataHandlerTest {
     @Test
     public void testReadGameTable() {
         dataHandler.createGameTable();
-        dataHandler.insertGameTable(120, 500);
+        dataHandler.insertGameTable(120, 25, 500);
         String jsonData = dataHandler.readGameTable();
 
         assertNotNull(jsonData, "Returned JSON data should not be null");
         assertTrue(jsonData.contains("120"), "JSON data should contain inserted duration");
+        assertTrue(jsonData.contains("25"), "JSON data should contain inserted snake length");
         assertTrue(jsonData.contains("500"), "JSON data should contain inserted score");
     }
 
@@ -110,8 +112,8 @@ public class DataHandlerTest {
     @Test
     public String testReadLeaderboard() {
         dataHandler.createGameTable();
-        dataHandler.insertGameTable(120, 500);
-        dataHandler.insertGameTable(150, 1000);
+        dataHandler.insertGameTable(120, 25, 500);
+        dataHandler.insertGameTable(150, 32, 1000);
         String leaderboardData = dataHandler.readLeaderboard(5);
 
         assertNotNull(leaderboardData, "Returned JSON data should not be null");

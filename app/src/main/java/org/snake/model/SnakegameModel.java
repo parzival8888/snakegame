@@ -218,6 +218,7 @@ public class SnakegameModel {
      */
     public void saveAllProperties(Object[][] properties) {
         ConfigReader.saveAllProperties(CONFIG_FILENAME, properties);
+        readConfig();
     }
     
     /**
@@ -336,8 +337,19 @@ public class SnakegameModel {
      * @return A JSONArray containing historical gameplay entries with durations.
      */
     public JSONArray getGameHistory() {
-        JSONArray gameHistory = new JSONArray(dataHandler.readSessionTable());
+        JSONArray gameHistory = new JSONArray(dataHandler.readGameTable());
         return gameHistory;
+    }
+
+    /**
+     * Retrieves daily gameplay stats data from DataHandler, returning it as a JSON
+     * array.
+     *
+     * @return A JSONArray containing historical gameplay entries with durations.
+     */
+    public JSONArray getDailyStats() {
+        JSONArray dailyStats = new JSONArray(dataHandler.readSessionTable());
+        return dailyStats;
     }
 
     /**
@@ -453,29 +465,29 @@ public class SnakegameModel {
         this.currentSessionTime += gameTime;
         this.currentSessionGamesPlayed++;
         dataHandler.insertSessionTable(currentSessionTime, currentSessionGamesPlayed);
-        dataHandler.insertGameTable(gameTime, currentScore);
+        dataHandler.insertGameTable(gameTime, ((snake == null) ? 0 : snake.getSnakeLength()), currentScore);
     }
 
-/**
-* Starts a new gameplay session by initializing components like snake and food,
-* checking against daily time limits set by configuration settings.     
-*
-* If daily limit exceeded, sets flags accordingly to indicate end of playtime.     
-*
-* @return A boolean indicating whether gameplay has ended due to exceeding daily limits.     
-*/     
-public boolean startNewGame() {     
-      this.initialiseSnake();     
-      this.placeFood();     
-      this.getSessionTime();     
+    /**
+    * Starts a new gameplay session by initializing components like snake and food,
+    * checking against daily time limits set by configuration settings.     
+    *
+    * If daily limit exceeded, sets flags accordingly to indicate end of playtime.     
+    *
+    * @return A boolean indicating whether gameplay has ended due to exceeding daily limits.     
+    */     
+    public boolean startNewGame() {     
+        this.initialiseSnake();     
+        this.placeFood();     
+        this.getSessionTime();     
 
-      if (this.currentSessionTime > this.gameTimeAllowed) {     
-          this.dailyTimeUsed = true;     
-          this.gameOver = true;     
-          return true;     
-       } else {     
-           this.dailyTimeUsed = false;
-           return false;
-       }
+        if (this.currentSessionTime > this.gameTimeAllowed) {     
+            this.dailyTimeUsed = true;     
+            this.gameOver = true;     
+            return true;     
+        } else {     
+            this.dailyTimeUsed = false;
+            return false;
+        }
     }
 }
