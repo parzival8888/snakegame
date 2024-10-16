@@ -35,7 +35,7 @@ public class GameboardPanel extends JPanel {
     private JLabel scoreLabel;
     private JLabel gameTimerLabel;
     private JLabel sessionTimerLabel;
-    private static int sessionTimerInterval = 1000;
+    private static int sessionTimerInterval = 1000; // hard code to 1 second
 
     /**
      * Constructs a GameboardPanel with the specified model and labels.

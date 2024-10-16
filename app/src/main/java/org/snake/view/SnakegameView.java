@@ -3,6 +3,8 @@ package org.snake.view;
 import javax.swing.*;
 import javax.swing.border.BevelBorder;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableColumn;
+
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -69,6 +71,17 @@ public class SnakegameView extends JFrame {
             + "Use P to pause the game<br>"
             + "Eat food to grow bigger<br>"
             + "Avoid hitting the walls or yourself</div></html>";
+    private static final String[][] GAME_SETTINGS_LABEL = {
+            {"gametitle", "Title appearing at the top of the application"},
+            {"boardsize", "Size of the board in pixels. 800 is an average board size"},
+            {"numberofcolumns", "The number of columns and rows in the game board"},
+            {"boardcolour", "Game board colour, using hex, rgb. E.g. hex #0000FF, rgb 0000FF"},
+            {"boardgridcolour", "The colour of the grid lines"},
+            {"timerinterval", "Timer to control snake speed, in milliseconds. 100 is quick, 500 is slow"},
+            {"snakelength", "The starting length of the snake"},
+            {"startdirection", "Initial snake direction, either U, D, L or R"},
+            {"topscorestodisplay", "The number of top scores to display on the leaderboard"}
+    };
 
     /**
      * Constructs a SnakegameView object and initializes the UI components.
@@ -509,6 +522,23 @@ public class SnakegameView extends JFrame {
             gameSettingsTableModel.setDataVector(data, columnNames);
             gameSettingsTableModel.fireTableDataChanged();
         }
+
+        // Add a table explaining the game settings
+        JLabel explainLabel = new JLabel("Explanation of the game settings");
+        explainLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        explainLabel.setFont(font);
+
+        String[] explainColumnNames = {"Setting", "Description"};
+        JTable explainSettingsTable = new JTable(GAME_SETTINGS_LABEL, explainColumnNames);
+        // Set the column preferred widths
+        // Get the first column
+        TableColumn column = explainSettingsTable.getColumnModel().getColumn(0);
+        JScrollPane explainScrollPane = new JScrollPane(explainSettingsTable);
+
+        // Set the preferred width of the column
+        column.setPreferredWidth(5);
+        gameSettingsPanel.add(explainLabel, BorderLayout.SOUTH);
+        gameSettingsPanel.add(explainScrollPane, BorderLayout.SOUTH);
 
         // Show the menu panel
         menuButton.addActionListener(e -> switchPanel(menuButton.getText()));

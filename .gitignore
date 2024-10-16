@@ -43,3 +43,4 @@ app/build/test-results/test/binary/results.bin
 app/build/tmp/compileJava/previous-compilation-data.bin
 app/build/tmp/compileJava/compileTransaction/stash-dir/App.class.uniqueId0
 app/build/tmp/compileTestJava/previous-compilation-data.bin
+app/snakegame.config
